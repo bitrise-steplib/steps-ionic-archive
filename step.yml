@@ -21,6 +21,7 @@ type_tags:
 deps:
   brew:
   - name: go
+  - name: gradle
 toolkit:
   go:
     package_name: github.com/bitrise-community/steps-ionic-archive
@@ -67,22 +68,22 @@ inputs:
       - device
       - emulator
       is_required: true
-  - cordova_version: 
+  - cordova_version: "7"
     opts:
       title: "Cordova version"
       description: |-
         The version of cordova you want to use.
-
-        If value is set to `latest`, the step will update to the latest cordova version.
-        Leave this input empty to use the preinstalled cordova version.
-  - ionic_version: 
+      value_options:
+      - "7"
+      - "6"
+  - ionic_version: "3"
     opts:
       title: "Ionic version"
       description: |-
         The version of ionic you want to use.
-
-        If value is set to `latest`, the step will update to the latest ionic version.
-        Leave this input empty to use the preinstalled ionic version.
+      value_options:
+      - "3"
+      - "2"
   - build_config: $BITRISE_CORDOVA_BUILD_CONFIGURATION
     opts:
       title: "Build configuration path, to describe code signing properties"
