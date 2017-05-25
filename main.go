@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/bitrise-community/steps-ionic-archive/ionic"
+	"github.com/bitrise-io/go-utils/colorstring"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
@@ -30,24 +31,28 @@ const (
 
 // ConfigsModel ...
 type ConfigsModel struct {
-	WorkDir       string
-	BuildConfig   string
-	Platform      string
-	Configuration string
-	Target        string
-	Options       string
-	DeployDir     string
+	WorkDir        string
+	BuildConfig    string
+	Platform       string
+	Configuration  string
+	Target         string
+	CordovaVersion string
+	IonicVersion   string
+	Options        string
+	DeployDir      string
 }
 
 func createConfigsModelFromEnvs() ConfigsModel {
 	return ConfigsModel{
-		WorkDir:       os.Getenv("workdir"),
-		BuildConfig:   os.Getenv("build_config"),
-		Platform:      os.Getenv("platform"),
-		Configuration: os.Getenv("configuration"),
-		Target:        os.Getenv("target"),
-		Options:       os.Getenv("options"),
-		DeployDir:     os.Getenv("BITRISE_DEPLOY_DIR"),
+		WorkDir:        os.Getenv("workdir"),
+		BuildConfig:    os.Getenv("build_config"),
+		Platform:       os.Getenv("platform"),
+		Configuration:  os.Getenv("configuration"),
+		Target:         os.Getenv("target"),
+		CordovaVersion: os.Getenv("cordova_version"),
+		IonicVersion:   os.Getenv("ionic_version"),
+		Options:        os.Getenv("options"),
+		DeployDir:      os.Getenv("BITRISE_DEPLOY_DIR"),
 	}
 }
 
@@ -58,6 +63,8 @@ func (configs ConfigsModel) print() {
 	log.Printf("- Platform: %s", configs.Platform)
 	log.Printf("- Configuration: %s", configs.Configuration)
 	log.Printf("- Target: %s", configs.Target)
+	log.Printf("- CordovaVersion: %s", configs.CordovaVersion)
+	log.Printf("- IonicVersion: %s", configs.IonicVersion)
 	log.Printf("- Options: %s", configs.Options)
 	log.Printf("- DeployDir: %s", configs.DeployDir)
 }
@@ -122,6 +129,38 @@ func moveAndExportOutputs(outputs []string, deployDir, envKey string) (string, e
 	return outputToExport, nil
 }
 
+func npmUpdate(tool, version string) error {
+	args := []string{}
+	if version == "latest" {
+		args = append(args, "install", "-g", tool)
+	} else {
+		args = append(args, "install", "-g", tool+"@"+version)
+	}
+
+	cmd := command.New("npm", args...)
+
+	log.Donef("$ %s", cmd.PrintableCommandArgs())
+
+	if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
+		return fmt.Errorf("command failed, output: %s, error: %s", out, err)
+	}
+	return nil
+}
+
+func toolVersion(tool string) (string, error) {
+	out, err := command.New(tool, "-v").RunAndReturnTrimmedCombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("$ %s -v failed, output: %s, error: %s", tool, out, err)
+	}
+
+	lines := strings.Split(out, "\n")
+	if len(lines) > 0 {
+		return lines[len(lines)-1], nil
+	}
+
+	return out, nil
+}
+
 func fail(format string, v ...interface{}) {
 	log.Errorf(format, v...)
 	os.Exit(1)
@@ -136,6 +175,42 @@ func main() {
 	if err := configs.validate(); err != nil {
 		fail("Issue with input: %s", err)
 	}
+
+	// Update cordova and ionic version
+	if configs.CordovaVersion != "" {
+		fmt.Println()
+		log.Infof("Updating cordova version to: %s", configs.CordovaVersion)
+
+		if err := npmUpdate("cordova", configs.CordovaVersion); err != nil {
+			fail(err.Error())
+		}
+	}
+
+	if configs.IonicVersion != "" {
+		fmt.Println()
+		log.Infof("Updating ionic version to: %s", configs.IonicVersion)
+
+		if err := npmUpdate("ionic", configs.IonicVersion); err != nil {
+			fail(err.Error())
+		}
+	}
+
+	// Print cordova and ionic version
+	cordovaVersion, err := toolVersion("cordova")
+	if err != nil {
+		fail(err.Error())
+	}
+
+	fmt.Println()
+	log.Printf("using cordova version:\n%s", colorstring.Green(cordovaVersion))
+
+	ionicVersion, err := toolVersion("ionic")
+	if err != nil {
+		fail(err.Error())
+	}
+
+	fmt.Println()
+	log.Printf("using ionic version:\n%s", colorstring.Green(ionicVersion))
 
 	// Fulfill ionic builder
 	builder := ionic.New()
