@@ -12,8 +12,8 @@ type Model struct {
 }
 
 // New ...
-func New() *Model {
-	return &Model{}
+func New() Model {
+	return Model{}
 }
 
 // SetPlatforms ...
