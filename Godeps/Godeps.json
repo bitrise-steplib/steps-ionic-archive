@@ -27,6 +27,10 @@
 			"Rev": "ad8f0cff18a087ae94ce410d6dbd9f04bb6d6c00"
 		},
 		{
+			"ImportPath": "github.com/bitrise-io/go-utils/ziputil",
+			"Rev": "ad8f0cff18a087ae94ce410d6dbd9f04bb6d6c00"
+		},
+		{
 			"ImportPath": "github.com/bitrise-tools/go-steputils/input",
 			"Rev": "4648abbb44aff0929ccdd27312aa0a70077c14fc"
 		},
