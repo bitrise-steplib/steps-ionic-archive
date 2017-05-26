@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/bitrise-community/steps-ionic-archive/ionic"
-	"github.com/bitrise-io/go-utils/colorstring"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
@@ -147,20 +146,6 @@ func npmUpdate(tool, version string) error {
 	return nil
 }
 
-func toolVersion(tool string) (string, error) {
-	out, err := command.New(tool, "-v").RunAndReturnTrimmedCombinedOutput()
-	if err != nil {
-		return "", fmt.Errorf("$ %s -v failed, output: %s, error: %s", tool, out, err)
-	}
-
-	lines := strings.Split(out, "\n")
-	if len(lines) > 0 {
-		return lines[len(lines)-1], nil
-	}
-
-	return out, nil
-}
-
 func fail(format string, v ...interface{}) {
 	log.Errorf(format, v...)
 	os.Exit(1)
@@ -196,25 +181,31 @@ func main() {
 	}
 
 	// Print cordova and ionic version
-	cordovaVersion, err := toolVersion("cordova")
-	if err != nil {
-		fail(err.Error())
-	}
-
-	fmt.Println()
-	log.Printf("using cordova version:\n%s", colorstring.Green(cordovaVersion))
-
-	ionicVersion, err := toolVersion("ionic")
-	if err != nil {
-		fail(err.Error())
-	}
-
-	fmt.Println()
-	log.Printf("using ionic version:\n%s", colorstring.Green(ionicVersion))
-
-	// Fulfill ionic builder
 	builder := ionic.New()
 
+	fmt.Println()
+	log.Infof("cordova version")
+
+	cmd := builder.VersionCommand().SetStdout(os.Stdout).SetStderr(os.Stderr)
+
+	log.Donef("$ %s", cmd.PrintableCommandArgs())
+
+	if err := cmd.Run(); err != nil {
+		fail("command failed, error: %s", err)
+	}
+
+	fmt.Println()
+	log.Infof("ionic version")
+
+	cmd = builder.VersionCommand().SetStdout(os.Stdout).SetStderr(os.Stderr)
+
+	log.Donef("$ %s", cmd.PrintableCommandArgs())
+
+	if err := cmd.Run(); err != nil {
+		fail("command failed, error: %s", err)
+	}
+
+	// Fulfill ionic builder
 	platforms := []string{}
 	if configs.Platform != "" {
 		platformsSplit := strings.Split(configs.Platform, ",")
