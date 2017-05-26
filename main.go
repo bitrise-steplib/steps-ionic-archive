@@ -181,10 +181,12 @@ func main() {
 	}
 
 	// Print cordova and ionic version
+	builder := ionic.New()
+
 	fmt.Println()
 	log.Infof("cordova version")
 
-	cmd := command.New("cordova", "-v").SetStdout(os.Stdout).SetStderr(os.Stderr)
+	cmd := builder.VersionCommand().SetStdout(os.Stdout).SetStderr(os.Stderr)
 
 	log.Donef("$ %s", cmd.PrintableCommandArgs())
 
@@ -195,7 +197,7 @@ func main() {
 	fmt.Println()
 	log.Infof("ionic version")
 
-	cmd = command.New("ionic", "-v", "--no-interactive").SetStdout(os.Stdout).SetStderr(os.Stderr)
+	cmd = builder.VersionCommand().SetStdout(os.Stdout).SetStderr(os.Stderr)
 
 	log.Donef("$ %s", cmd.PrintableCommandArgs())
 
@@ -204,8 +206,6 @@ func main() {
 	}
 
 	// Fulfill ionic builder
-	builder := ionic.New()
-
 	platforms := []string{}
 	if configs.Platform != "" {
 		platformsSplit := strings.Split(configs.Platform, ",")

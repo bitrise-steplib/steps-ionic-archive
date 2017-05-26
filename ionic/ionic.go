@@ -46,8 +46,16 @@ func (builder *Model) SetCustomOptions(customOptions ...string) *Model {
 	return builder
 }
 
-func (builder *Model) commandSlice(cmd ...string) []string {
-	cmdSlice := []string{"ionic", "cordova", "--no-interactive"}
+func (builder *Model) defaultIonicCommandSlice(cmd ...string) []string {
+	return []string{"ionic", "--no-interactive", "--confirm"}
+}
+
+func (builder *Model) defaultIonicCordovaCommandSlice(cmd ...string) []string {
+	return []string{"ionic", "cordova", "--no-interactive", "--confirm"}
+}
+
+func (builder *Model) cordovaCommandSlice(cmd ...string) []string {
+	cmdSlice := builder.defaultIonicCordovaCommandSlice()
 	cmdSlice = append(cmdSlice, cmd...)
 
 	if len(cmd) == 1 && cmd[0] == "build" {
@@ -72,14 +80,21 @@ func (builder *Model) commandSlice(cmd ...string) []string {
 	return cmdSlice
 }
 
+// VersionCommand ...
+func (builder *Model) VersionCommand() *command.Model {
+	cmdSlice := builder.defaultIonicCommandSlice()
+	cmdSlice = append(cmdSlice, "-v")
+	return command.New(cmdSlice[0], cmdSlice[1:]...)
+}
+
 // PlatformCommand ...
 func (builder *Model) PlatformCommand(cmd string) *command.Model {
-	cmdSlice := builder.commandSlice("platform", cmd)
+	cmdSlice := builder.cordovaCommandSlice("platform", cmd)
 	return command.New(cmdSlice[0], cmdSlice[1:]...)
 }
 
 // BuildCommand ...
 func (builder *Model) BuildCommand() *command.Model {
-	cmdSlice := builder.commandSlice("build")
+	cmdSlice := builder.cordovaCommandSlice("build")
 	return command.New(cmdSlice[0], cmdSlice[1:]...)
 }
