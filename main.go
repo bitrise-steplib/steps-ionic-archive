@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/bitrise-community/steps-ionic-archive/ionic"
@@ -14,6 +16,7 @@ import (
 	"github.com/bitrise-io/go-utils/ziputil"
 	"github.com/bitrise-tools/go-steputils/input"
 	"github.com/bitrise-tools/go-steputils/tools"
+	ver "github.com/hashicorp/go-version"
 	"github.com/kballard/go-shellquote"
 )
 
@@ -85,37 +88,62 @@ func (configs ConfigsModel) validate() error {
 	if err := input.ValidateIfNotEmpty(configs.Target); err != nil {
 		return fmt.Errorf("Target: %s", err)
 	}
+	if err := input.ValidateWithOptions(configs.CordovaVersion, "7", "6"); err != nil {
+		return fmt.Errorf("CordovaVersion: %s", err)
+	}
+	if err := input.ValidateWithOptions(configs.IonicVersion, "3", "2"); err != nil {
+		return fmt.Errorf("IonicVersion: %s", err)
+	}
 
 	return nil
 }
 
 func moveAndExportOutputs(outputs []string, deployDir, envKey string) (string, error) {
 	outputToExport := ""
+
 	for _, output := range outputs {
-		outputFile, err := os.Open(output)
+		info, exist, err := pathutil.PathCheckAndInfos(output)
 		if err != nil {
 			return "", err
 		}
 
-		outputFileInfo, err := outputFile.Stat()
-		if err != nil {
-			return "", err
+		if !exist {
+			return "", fmt.Errorf("file not exist at: %s", output)
 		}
 
-		fileName := filepath.Base(output)
-		destinationPth := filepath.Join(deployDir, fileName)
-
-		if outputFileInfo.IsDir() {
-			if err := command.CopyDir(output, destinationPth, false); err != nil {
+		if info.Mode()&os.ModeSymlink != 0 {
+			resolvedOutput, err := os.Readlink(output)
+			if err != nil {
 				return "", err
 			}
-		} else {
+
+			log.Warnf("output %s is symlink, original: %s", output, resolvedOutput)
+
+			output = resolvedOutput
+		}
+
+		if exist, err := pathutil.IsDirExists(output); err != nil {
+			return "", err
+		} else if exist {
+			if err := command.CopyDir(output, deployDir, false); err != nil {
+				return "", err
+			}
+
+			outputToExport = filepath.Join(deployDir, filepath.Base(output))
+		} else if exist, err := pathutil.IsPathExists(output); err != nil {
+			return "", err
+		} else if exist {
+			fileName := filepath.Base(output)
+			destinationPth := filepath.Join(deployDir, fileName)
+
 			if err := command.CopyFile(output, destinationPth); err != nil {
 				return "", err
 			}
-		}
 
-		outputToExport = destinationPth
+			outputToExport = destinationPth
+		} else {
+			log.Warnf("no regular file, nor directory exists at: %s, skipping...", output)
+		}
 	}
 
 	if outputToExport == "" {
@@ -129,14 +157,12 @@ func moveAndExportOutputs(outputs []string, deployDir, envKey string) (string, e
 	return outputToExport, nil
 }
 
-func npmUpdate(tool, version string) error {
-	args := []string{}
-	if version == "latest" {
-		args = append(args, "install", "-g", tool)
-	} else {
-		args = append(args, "install", "-g", tool+"@"+version)
+func npmInstall(isGlobal bool, pkg ...string) error {
+	args := []string{"install"}
+	if isGlobal {
+		args = append(args, "-g")
 	}
-
+	args = append(args, pkg...)
 	cmd := command.New("npm", args...)
 
 	log.Donef("$ %s", cmd.PrintableCommandArgs())
@@ -147,17 +173,37 @@ func npmUpdate(tool, version string) error {
 	return nil
 }
 
-func toolVersion(tool string) (string, error) {
-	out, err := command.New(tool, "-v").RunAndReturnTrimmedCombinedOutput()
+func ionicVersion() (string, error) {
+	cmd := command.New("ionic", "-v")
+	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
-		return "", fmt.Errorf("$ %s -v failed, output: %s, error: %s", tool, out, err)
+		return "", err
 	}
 
-	lines := strings.Split(out, "\n")
-	if len(lines) > 0 {
-		return lines[len(lines)-1], nil
+	// fix for ionic-cli intercative version output: `[1000D[K3.2.0`
+	pattern := `.*(?P<version>\d.\d.\d).*`
+
+	reader := strings.NewReader(out)
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if match := regexp.MustCompile(pattern).FindStringSubmatch(line); len(match) == 2 {
+			return match[1], nil
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return "", err
 	}
 
+	return "", fmt.Errorf("failed to get ionic version")
+}
+
+func cordovaVersion() (string, error) {
+	cmd := command.New("cordova", "-v")
+	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
+	if err != nil {
+		return "", err
+	}
 	return out, nil
 }
 
@@ -175,69 +221,6 @@ func main() {
 	if err := configs.validate(); err != nil {
 		fail("Issue with input: %s", err)
 	}
-
-	// Update cordova and ionic version
-	if configs.CordovaVersion != "" {
-		fmt.Println()
-		log.Infof("Updating cordova version to: %s", configs.CordovaVersion)
-
-		if err := npmUpdate("cordova", configs.CordovaVersion); err != nil {
-			fail(err.Error())
-		}
-	}
-
-	if configs.IonicVersion != "" {
-		fmt.Println()
-		log.Infof("Updating ionic version to: %s", configs.IonicVersion)
-
-		if err := npmUpdate("ionic", configs.IonicVersion); err != nil {
-			fail(err.Error())
-		}
-	}
-
-	// Print cordova and ionic version
-	cordovaVersion, err := toolVersion("cordova")
-	if err != nil {
-		fail(err.Error())
-	}
-
-	fmt.Println()
-	log.Printf("using cordova version:\n%s", colorstring.Green(cordovaVersion))
-
-	ionicVersion, err := toolVersion("ionic")
-	if err != nil {
-		fail(err.Error())
-	}
-
-	fmt.Println()
-	log.Printf("using ionic version:\n%s", colorstring.Green(ionicVersion))
-
-	// Fulfill ionic builder
-	builder := ionic.New()
-
-	platforms := []string{}
-	if configs.Platform != "" {
-		platformsSplit := strings.Split(configs.Platform, ",")
-		for _, platform := range platformsSplit {
-			platforms = append(platforms, strings.TrimSpace(platform))
-		}
-
-		builder.SetPlatforms(platforms...)
-	}
-
-	builder.SetConfiguration(configs.Configuration)
-	builder.SetTarget(configs.Target)
-
-	if configs.Options != "" {
-		options, err := shellquote.Split(configs.Options)
-		if err != nil {
-			fail("Failed to shell split Options (%s), error: %s", configs.Options, err)
-		}
-
-		builder.SetCustomOptions(options...)
-	}
-
-	builder.SetBuildConfig(configs.BuildConfig)
 
 	// Change dir to working directory
 	workDir, err := pathutil.AbsPath(configs.WorkDir)
@@ -267,19 +250,100 @@ func main() {
 		}()
 	}
 
+	// Update cordova and ionic version
+	if configs.CordovaVersion != "" {
+		fmt.Println()
+		log.Infof("Updating cordova version to: %s", configs.CordovaVersion)
+
+		if err := npmInstall(true, "cordova@"+configs.CordovaVersion); err != nil {
+			fail(err.Error())
+		}
+	}
+
+	if configs.IonicVersion != "" {
+		fmt.Println()
+		log.Infof("Updating ionic version to: %s", configs.IonicVersion)
+
+		if err := npmInstall(true, "ionic@"+configs.IonicVersion); err != nil {
+			fail(err.Error())
+		}
+	}
+
+	// Print cordova and ionic version
+	cordovaVerStr, err := cordovaVersion()
+	if err != nil {
+		fail("Failed to get cordova version, error: %s", err)
+	}
+
+	fmt.Println()
+	log.Printf("cordova version: %s", colorstring.Green(cordovaVerStr))
+
+	ionicVerStr, err := ionicVersion()
+	if err != nil {
+		fail("Failed to get ionic version, error: %s", err)
+	}
+
+	log.Printf("ionic version: %s", colorstring.Green(ionicVerStr))
+
+	ionicVer, err := ver.NewVersion(ionicVerStr)
+	if err != nil {
+		fail("Failed to parse ionic version, error: %s", err)
+	}
+
+	ionicMajorVersion := ionicVer.Segments()[0]
+
+	// Fulfill ionic builder
+	builder := ionic.New(ionicMajorVersion)
+
+	platforms := []string{}
+	if configs.Platform != "" {
+		platformsSplit := strings.Split(configs.Platform, ",")
+		for _, platform := range platformsSplit {
+			platforms = append(platforms, strings.TrimSpace(platform))
+		}
+
+		builder.SetPlatforms(platforms...)
+	}
+
+	builder.SetConfiguration(configs.Configuration)
+	builder.SetTarget(configs.Target)
+
+	if configs.Options != "" {
+		options, err := shellquote.Split(configs.Options)
+		if err != nil {
+			fail("Failed to shell split Options (%s), error: %s", configs.Options, err)
+		}
+
+		builder.SetCustomOptions(options...)
+	}
+
+	builder.SetBuildConfig(configs.BuildConfig)
+
 	// ionic prepare
 	fmt.Println()
 	log.Infof("Preparing project")
 
-	platformRemoveCmd := builder.PlatformCommand("rm")
-	platformRemoveCmd.SetStdout(os.Stdout)
-	platformRemoveCmd.SetStderr(os.Stderr)
-	platformRemoveCmd.SetStdin(strings.NewReader("y"))
+	if ionicMajorVersion == 2 {
+		if err := npmInstall(true, "bower"); err != nil {
+			fail("`command failed, error: %s", err)
+		}
+	} else if ionicMajorVersion == 3 {
+		if err := npmInstall(false, "@ionic/cli-plugin-ionic-angular@latest", "@ionic/cli-plugin-cordova@latest"); err != nil {
+			fail("command failed, error: %s", err)
+		}
+	}
 
-	log.Donef("$ %s", platformRemoveCmd.PrintableCommandArgs())
+	if ionicMajorVersion > 2 {
+		platformRemoveCmd := builder.PlatformCommand("rm")
+		platformRemoveCmd.SetStdout(os.Stdout)
+		platformRemoveCmd.SetStderr(os.Stderr)
+		platformRemoveCmd.SetStdin(strings.NewReader("y"))
 
-	if err := platformRemoveCmd.Run(); err != nil {
-		fail("ionic failed, error: %s", err)
+		log.Donef("$ %s", platformRemoveCmd.PrintableCommandArgs())
+
+		if err := platformRemoveCmd.Run(); err != nil {
+			fail("ionic failed, error: %s", err)
+		}
 	}
 
 	platformAddCmd := builder.PlatformCommand("add")
@@ -310,13 +374,16 @@ func main() {
 
 	// collect outputs
 
+	iosOutputDirExist := false
 	iosOutputDir := filepath.Join(workDir, "platforms", "ios", "build", configs.Target)
 	if exist, err := pathutil.IsDirExists(iosOutputDir); err != nil {
 		fail("Failed to check if dir (%s) exist, error: %s", iosOutputDir, err)
 	} else if exist {
+		iosOutputDirExist = true
 		fmt.Println()
 		log.Infof("Collecting ios outputs")
 
+		// ipa
 		ipaPattern := filepath.Join(iosOutputDir, "*.ipa")
 		ipas, err := filepath.Glob(ipaPattern)
 		if err != nil {
@@ -326,11 +393,13 @@ func main() {
 		if len(ipas) > 0 {
 			if exportedPth, err := moveAndExportOutputs(ipas, configs.DeployDir, ipaPathEnvKey); err != nil {
 				fail("Failed to export ipas, error: %s", err)
-			} else {
+			} else if exportedPth != "" {
 				log.Donef("The ipa path is now available in the Environment Variable: %s (value: %s)", ipaPathEnvKey, exportedPth)
 			}
 		}
+		// ---
 
+		// dsym
 		dsymPattern := filepath.Join(iosOutputDir, "*.dSYM")
 		dsyms, err := filepath.Glob(dsymPattern)
 		if err != nil {
@@ -340,11 +409,11 @@ func main() {
 		if len(dsyms) > 0 {
 			if exportedPth, err := moveAndExportOutputs(dsyms, configs.DeployDir, dsymDirPathEnvKey); err != nil {
 				fail("Failed to export dsyms, error: %s", err)
-			} else {
+			} else if exportedPth != "" {
 				log.Donef("The dsym dir path is now available in the Environment Variable: %s (value: %s)", dsymDirPathEnvKey, exportedPth)
 
 				zippedExportedPth := exportedPth + ".zip"
-				if err := ziputil.Zip(exportedPth, zippedExportedPth); err != nil {
+				if err := ziputil.ZipDir(exportedPth, zippedExportedPth, false); err != nil {
 					fail("Failed to zip dsym dir (%s), error: %s", exportedPth, err)
 				}
 
@@ -355,7 +424,9 @@ func main() {
 				log.Donef("The dsym.zip path is now available in the Environment Variable: %s (value: %s)", dsymZipPathEnvKey, zippedExportedPth)
 			}
 		}
+		// --
 
+		// app
 		appPattern := filepath.Join(iosOutputDir, "*.app")
 		apps, err := filepath.Glob(appPattern)
 		if err != nil {
@@ -365,11 +436,11 @@ func main() {
 		if len(apps) > 0 {
 			if exportedPth, err := moveAndExportOutputs(apps, configs.DeployDir, appDirPathEnvKey); err != nil {
 				fail("Failed to export apps, error: %s", err)
-			} else {
+			} else if exportedPth != "" {
 				log.Donef("The app dir path is now available in the Environment Variable: %s (value: %s)", appDirPathEnvKey, exportedPth)
 
 				zippedExportedPth := exportedPth + ".zip"
-				if err := ziputil.Zip(exportedPth, zippedExportedPth); err != nil {
+				if err := ziputil.ZipDir(exportedPth, zippedExportedPth, false); err != nil {
 					fail("Failed to zip app dir (%s), error: %s", exportedPth, err)
 				}
 
@@ -380,12 +451,15 @@ func main() {
 				log.Donef("The app.zip path is now available in the Environment Variable: %s (value: %s)", appZipPathEnvKey, zippedExportedPth)
 			}
 		}
+		// ---
 	}
 
+	androidOutputDirExist := false
 	androidOutputDir := filepath.Join(workDir, "platforms", "android", "build", "outputs", "apk")
 	if exist, err := pathutil.IsDirExists(androidOutputDir); err != nil {
-		fail("Failed to check if dir (%s) exist, error: %s", iosOutputDir, err)
+		fail("Failed to check if dir (%s) exist, error: %s", androidOutputDir, err)
 	} else if exist {
+		androidOutputDirExist = true
 		fmt.Println()
 		log.Infof("Collecting android outputs")
 
@@ -398,9 +472,14 @@ func main() {
 		if len(apks) > 0 {
 			if exportedPth, err := moveAndExportOutputs(apks, configs.DeployDir, apkPathEnvKey); err != nil {
 				fail("Failed to export apks, error: %s", err)
-			} else {
+			} else if exportedPth != "" {
 				log.Donef("The apk path is now available in the Environment Variable: %s (value: %s)", apkPathEnvKey, exportedPth)
 			}
 		}
+	}
+
+	if !iosOutputDirExist && !androidOutputDirExist {
+		log.Warnf("No ios nor android platform's output dir exist")
+		fail("no output generated")
 	}
 }

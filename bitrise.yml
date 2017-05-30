@@ -4,7 +4,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 app:
   envs:
   - STEP_VERSION: 0.9.1
-  - SAMPLE_APP_URL: https://github.com/bitrise-samples/ionic-2.git
+  - SAMPLE_APP_URL: https://github.com/bitrise-samples/ionic-conference-app.git
 
 workflows:
   test:
@@ -34,12 +34,16 @@ workflows:
         - branch: "master"
         - pull_request_id: ""
         - clone_depth: ""
+    - npm:
+        inputs:
+        - workdir: ./
+        - command: install
     - path::./:
         title: Step Test
         inputs:
-        - workdir: ./cutePuppyPics
+        - workdir: ./
         - target: emulator
-        - platform: ios
+        - platform: ios,android
 
   go-tests:
     before_run:
