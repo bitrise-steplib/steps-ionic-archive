@@ -292,16 +292,6 @@ func main() {
 
 	ionicMajorVersion := ionicVer.Segments()[0]
 
-	if ionicMajorVersion == 2 {
-		if err := npmInstall(true, "bower"); err != nil {
-			fail("`command failed, error: %s", err)
-		}
-	} else if ionicMajorVersion == 3 {
-		if err := npmInstall(false, "@ionic/cli-plugin-ionic-angular@latest", "@ionic/cli-plugin-cordova@latest"); err != nil {
-			fail("command failed, error: %s", err)
-		}
-	}
-
 	// Fulfill ionic builder
 	builder := ionic.New(ionicMajorVersion)
 
@@ -332,6 +322,16 @@ func main() {
 	// ionic prepare
 	fmt.Println()
 	log.Infof("Preparing project")
+
+	if ionicMajorVersion == 2 {
+		if err := npmInstall(true, "bower"); err != nil {
+			fail("`command failed, error: %s", err)
+		}
+	} else if ionicMajorVersion == 3 {
+		if err := npmInstall(false, "@ionic/cli-plugin-ionic-angular@latest", "@ionic/cli-plugin-cordova@latest"); err != nil {
+			fail("command failed, error: %s", err)
+		}
+	}
 
 	if ionicMajorVersion > 2 {
 		platformRemoveCmd := builder.PlatformCommand("rm")
