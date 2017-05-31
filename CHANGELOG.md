@@ -1,6 +1,11 @@
-## Changelog (Current version: 0.9.2)
+## Changelog (Current version: 0.9.3)
 
 -----------------
+
+### 0.9.3 (2017 May 31)
+
+* [a62bcec] prepare for 0.9.3
+* [65fd6ab] ionic, cordova version unlock, ionic command fix (#5)
 
 ### 0.9.2 (2017 May 30)
 
@@ -14,4 +19,4 @@
 
 -----------------
 
-Updated: 2017 May 30
+Updated: 2017 May 31
