@@ -88,12 +88,6 @@ func (configs ConfigsModel) validate() error {
 	if err := input.ValidateIfNotEmpty(configs.Target); err != nil {
 		return fmt.Errorf("Target: %s", err)
 	}
-	if err := input.ValidateWithOptions(configs.CordovaVersion, "7", "6"); err != nil {
-		return fmt.Errorf("CordovaVersion: %s", err)
-	}
-	if err := input.ValidateWithOptions(configs.IonicVersion, "3", "2"); err != nil {
-		return fmt.Errorf("IonicVersion: %s", err)
-	}
 
 	return nil
 }
@@ -324,9 +318,7 @@ func main() {
 	log.Infof("Preparing project")
 
 	if ionicMajorVersion == 2 {
-		if err := npmInstall(true, "bower"); err != nil {
-			fail("`command failed, error: %s", err)
-		}
+
 	} else if ionicMajorVersion == 3 {
 		if err := npmInstall(false, "@ionic/cli-plugin-ionic-angular@latest", "@ionic/cli-plugin-cordova@latest"); err != nil {
 			fail("command failed, error: %s", err)
