@@ -54,9 +54,9 @@ func (builder *Model) PlatformCommand(cmd string) *command.Model {
 	cmdSlice := []string{}
 
 	if builder.ionicMajorVersion > 2 {
-		cmdSlice = []string{"ionic", "cordova", "--no-interactive", "--confirm"}
+		cmdSlice = []string{"ionic", "cordova"}
 	} else {
-		cmdSlice = []string{"ionic", "--no-interactive", "--confirm"}
+		cmdSlice = []string{"ionic"}
 	}
 
 	cmdSlice = append(cmdSlice, "platform", cmd)
@@ -69,9 +69,9 @@ func (builder *Model) BuildCommand() *command.Model {
 	cmdSlice := []string{}
 
 	if builder.ionicMajorVersion > 2 {
-		cmdSlice = []string{"ionic", "cordova", "--no-interactive", "--confirm"}
+		cmdSlice = []string{"ionic", "cordova"}
 	} else {
-		cmdSlice = []string{"ionic", "--no-interactive", "--confirm"}
+		cmdSlice = []string{"ionic"}
 	}
 
 	cmdSlice = append(cmdSlice, "build")
