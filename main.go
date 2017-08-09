@@ -94,50 +94,53 @@ func (configs ConfigsModel) validate() error {
 
 func moveAndExportOutputs(outputs []string, deployDir, envKey string) (string, error) {
 	outputToExport := ""
-
 	for _, output := range outputs {
-		info, exist, err := pathutil.PathCheckAndInfos(output)
+		info, err := os.Lstat(output)
 		if err != nil {
 			return "", err
 		}
 
-		if !exist {
-			return "", fmt.Errorf("file not exist at: %s", output)
-		}
-
 		if info.Mode()&os.ModeSymlink != 0 {
-			resolvedOutput, err := os.Readlink(output)
+			resolvedPth, err := os.Readlink(output)
 			if err != nil {
 				return "", err
 			}
 
-			log.Warnf("output %s is symlink, original: %s", output, resolvedOutput)
+			log.Warnf("Output: %s is a symlink to: %s", output, resolvedPth)
 
-			output = resolvedOutput
-		}
+			if exist, err := pathutil.IsPathExists(resolvedPth); err != nil {
+				return "", err
+			} else if !exist {
+				return "", fmt.Errorf("resolved path: %s does not exist", resolvedPth)
+			}
 
-		if exist, err := pathutil.IsDirExists(output); err != nil {
-			return "", err
-		} else if exist {
-			if err := command.CopyDir(output, deployDir, false); err != nil {
+			resolvedInfo, err := os.Lstat(resolvedPth)
+			if err != nil {
 				return "", err
 			}
 
-			outputToExport = filepath.Join(deployDir, filepath.Base(output))
-		} else if exist, err := pathutil.IsPathExists(output); err != nil {
-			return "", err
-		} else if exist {
-			fileName := filepath.Base(output)
-			destinationPth := filepath.Join(deployDir, fileName)
+			if resolvedInfo.Mode()&os.ModeSymlink != 0 {
+				return "", fmt.Errorf("resolved path: %s is still symlink", resolvedPth)
+			}
 
+			output = resolvedPth
+			info = resolvedInfo
+		}
+
+		fileName := filepath.Base(output)
+		destinationPth := filepath.Join(deployDir, fileName)
+
+		if info.IsDir() {
+			if err := command.CopyDir(output, destinationPth, false); err != nil {
+				return "", err
+			}
+		} else {
 			if err := command.CopyFile(output, destinationPth); err != nil {
 				return "", err
 			}
-
-			outputToExport = destinationPth
-		} else {
-			log.Warnf("no regular file, nor directory exists at: %s, skipping...", output)
 		}
+
+		outputToExport = destinationPth
 	}
 
 	if outputToExport == "" {
@@ -372,6 +375,7 @@ func main() {
 		fail("Failed to check if dir (%s) exist, error: %s", iosOutputDir, err)
 	} else if exist {
 		iosOutputDirExist = true
+
 		fmt.Println()
 		log.Infof("Collecting ios outputs")
 
@@ -452,6 +456,7 @@ func main() {
 		fail("Failed to check if dir (%s) exist, error: %s", androidOutputDir, err)
 	} else if exist {
 		androidOutputDirExist = true
+
 		fmt.Println()
 		log.Infof("Collecting android outputs")
 
@@ -472,6 +477,6 @@ func main() {
 
 	if !iosOutputDirExist && !androidOutputDirExist {
 		log.Warnf("No ios nor android platform's output dir exist")
-		fail("no output generated")
+		fail("No output generated")
 	}
 }

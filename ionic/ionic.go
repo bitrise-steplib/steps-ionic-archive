@@ -89,5 +89,7 @@ func (builder *Model) BuildCommand() *command.Model {
 		cmdSlice = append(cmdSlice, "--buildConfig", builder.buildConfig)
 	}
 
+	cmdSlice = append(cmdSlice, builder.customOptions...)
+
 	return command.New(cmdSlice[0], cmdSlice[1:]...)
 }
