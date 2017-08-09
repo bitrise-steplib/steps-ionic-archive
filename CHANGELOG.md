@@ -1,6 +1,11 @@
-## Changelog (Current version: 0.9.3)
+## Changelog (Current version: 0.9.4)
 
 -----------------
+
+### 0.9.4 (2017 Aug 09)
+
+* [1190ba5] prepare for 0.9.4
+* [b0329e6] handle symlinked output, use custom options, log fixes (#6)
 
 ### 0.9.3 (2017 May 31)
 
@@ -19,4 +24,4 @@
 
 -----------------
 
-Updated: 2017 May 31
+Updated: 2017 Aug 09
