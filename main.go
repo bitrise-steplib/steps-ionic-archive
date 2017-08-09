@@ -375,6 +375,7 @@ func main() {
 		fail("Failed to check if dir (%s) exist, error: %s", iosOutputDir, err)
 	} else if exist {
 		iosOutputDirExist = true
+
 		fmt.Println()
 		log.Infof("Collecting ios outputs")
 
@@ -455,6 +456,7 @@ func main() {
 		fail("Failed to check if dir (%s) exist, error: %s", androidOutputDir, err)
 	} else if exist {
 		androidOutputDirExist = true
+
 		fmt.Println()
 		log.Infof("Collecting android outputs")
 
@@ -475,6 +477,6 @@ func main() {
 
 	if !iosOutputDirExist && !androidOutputDirExist {
 		log.Warnf("No ios nor android platform's output dir exist")
-		fail("no output generated")
+		fail("No output generated")
 	}
 }
