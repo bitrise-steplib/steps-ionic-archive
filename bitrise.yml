@@ -34,6 +34,9 @@ workflows:
         - branch: "master"
         - pull_request_id: ""
         - clone_depth: ""
+    - script:
+        inputs:
+        - content: rm -rf node_modules; rm package-lock.json
     - npm:
         inputs:
         - workdir: ./
@@ -43,7 +46,8 @@ workflows:
         inputs:
         - workdir: ./
         - target: emulator
-        - platform: ios,android
+        - platform: ios
+        - ionic_version: latest
 
   go-tests:
     before_run:

@@ -172,6 +172,7 @@ func npmInstall(isGlobal bool, pkg ...string) error {
 
 func ionicVersion() (string, error) {
 	cmd := command.New("ionic", "-v")
+	cmd.SetStdin(strings.NewReader("Y"))
 	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
 		return "", err
@@ -192,7 +193,7 @@ func ionicVersion() (string, error) {
 		return "", err
 	}
 
-	return "", fmt.Errorf("failed to get ionic version")
+	return "", fmt.Errorf("output: %s", out)
 }
 
 func cordovaVersion() (string, error) {
@@ -267,6 +268,10 @@ func main() {
 	}
 
 	// Print cordova and ionic version
+	if err := npmInstall(false, "@ionic/cli-plugin-ionic-angular@latest", "@ionic/cli-plugin-cordova@latest"); err != nil {
+		fail("command failed, error: %s", err)
+	}
+
 	cordovaVerStr, err := cordovaVersion()
 	if err != nil {
 		fail("Failed to get cordova version, error: %s", err)
@@ -319,14 +324,6 @@ func main() {
 	// ionic prepare
 	fmt.Println()
 	log.Infof("Preparing project")
-
-	if ionicMajorVersion == 2 {
-
-	} else if ionicMajorVersion == 3 {
-		if err := npmInstall(false, "@ionic/cli-plugin-ionic-angular@latest", "@ionic/cli-plugin-cordova@latest"); err != nil {
-			fail("command failed, error: %s", err)
-		}
-	}
 
 	if ionicMajorVersion > 2 {
 		platformRemoveCmd := builder.PlatformCommand("rm")
@@ -431,7 +428,7 @@ func main() {
 
 		if len(apps) > 0 {
 			if exportedPth, err := moveAndExportOutputs(apps, configs.DeployDir, appDirPathEnvKey); err != nil {
-				fail("Failed to export apps, error: %s", err)
+				log.Warnf("Failed to export apps, error: %s", err)
 			} else if exportedPth != "" {
 				log.Donef("The app dir path is now available in the Environment Variable: %s (value: %s)", appDirPathEnvKey, exportedPth)
 

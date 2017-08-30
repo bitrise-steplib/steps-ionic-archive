@@ -21,7 +21,6 @@ type_tags:
 deps:
   brew:
   - name: go
-  - name: gradle
 toolkit:
   go:
     package_name: github.com/bitrise-community/steps-ionic-archive
