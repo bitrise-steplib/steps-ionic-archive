@@ -46,7 +46,7 @@ workflows:
         inputs:
         - workdir: ./
         - target: emulator
-        - platform: ios
+        - platform: ios,android
         - ionic_version: latest
 
   go-tests:
