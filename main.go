@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/bitrise-community/steps-ionic-archive/ionic"
 	"github.com/bitrise-io/go-utils/colorstring"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
@@ -17,7 +16,7 @@ import (
 	"github.com/bitrise-tools/go-steputils/input"
 	"github.com/bitrise-tools/go-steputils/tools"
 	ver "github.com/hashicorp/go-version"
-	"github.com/kballard/go-shellquote"
+	shellquote "github.com/kballard/go-shellquote"
 )
 
 const (
@@ -267,11 +266,13 @@ func main() {
 		}
 	}
 
-	// Print cordova and ionic version
+	fmt.Println()
+	log.Infof("Installing cordova and angular plugins")
 	if err := npmInstall(false, "@ionic/cli-plugin-ionic-angular@latest", "@ionic/cli-plugin-cordova@latest"); err != nil {
 		fail("command failed, error: %s", err)
 	}
 
+	// Print cordova and ionic version
 	cordovaVerStr, err := cordovaVersion()
 	if err != nil {
 		fail("Failed to get cordova version, error: %s", err)
@@ -294,74 +295,109 @@ func main() {
 
 	ionicMajorVersion := ionicVer.Segments()[0]
 
-	// Fulfill ionic builder
-	builder := ionic.New(ionicMajorVersion)
-
+	//
 	platforms := []string{}
 	if configs.Platform != "" {
 		platformsSplit := strings.Split(configs.Platform, ",")
 		for _, platform := range platformsSplit {
 			platforms = append(platforms, strings.TrimSpace(platform))
 		}
-
-		builder.SetPlatforms(platforms...)
 	}
-
-	builder.SetConfiguration(configs.Configuration)
-	builder.SetTarget(configs.Target)
-
-	if configs.Options != "" {
-		options, err := shellquote.Split(configs.Options)
-		if err != nil {
-			fail("Failed to shell split Options (%s), error: %s", configs.Options, err)
-		}
-
-		builder.SetCustomOptions(options...)
-	}
-
-	builder.SetBuildConfig(configs.BuildConfig)
 
 	// ionic prepare
 	fmt.Println()
-	log.Infof("Preparing project")
+	log.Infof("Building project")
 
-	if ionicMajorVersion > 2 {
-		platformRemoveCmd := builder.PlatformCommand("rm")
-		platformRemoveCmd.SetStdout(os.Stdout)
-		platformRemoveCmd.SetStderr(os.Stderr)
-		platformRemoveCmd.SetStdin(strings.NewReader("y"))
+	{
+		// platform rm
+		for _, platform := range platforms {
+			cmdArgs := []string{"ionic"}
+			if ionicMajorVersion > 2 {
+				cmdArgs = append(cmdArgs, "cordova")
+			}
 
-		log.Donef("$ %s", platformRemoveCmd.PrintableCommandArgs())
+			cmdArgs = append(cmdArgs, "platform", "rm")
 
-		if err := platformRemoveCmd.Run(); err != nil {
-			fail("ionic failed, error: %s", err)
+			cmdArgs = append(cmdArgs, platform)
+
+			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
+			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))
+
+			log.Donef("$ %s", cmd.PrintableCommandArgs())
+
+			if err := cmd.Run(); err != nil {
+				fail("command failed, error: %s", err)
+			}
 		}
 	}
 
-	platformAddCmd := builder.PlatformCommand("add")
-	platformAddCmd.SetStdout(os.Stdout)
-	platformAddCmd.SetStderr(os.Stderr)
-	platformAddCmd.SetStdin(strings.NewReader("y"))
+	{
+		// platform add
+		for _, platform := range platforms {
+			cmdArgs := []string{"ionic"}
+			if ionicMajorVersion > 2 {
+				cmdArgs = append(cmdArgs, "cordova")
+			}
 
-	log.Donef("$ %s", platformAddCmd.PrintableCommandArgs())
+			cmdArgs = append(cmdArgs, "platform", "add")
 
-	if err := platformAddCmd.Run(); err != nil {
-		fail("ionic failed, error: %s", err)
+			cmdArgs = append(cmdArgs, platform)
+
+			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
+			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))
+
+			log.Donef("$ %s", cmd.PrintableCommandArgs())
+
+			if err := cmd.Run(); err != nil {
+				fail("command failed, error: %s", err)
+			}
+		}
 	}
 
-	// ionic build
-	fmt.Println()
-	log.Infof("Building project")
+	{
+		// build
+		options := []string{}
+		if configs.Options != "" {
+			opts, err := shellquote.Split(configs.Options)
+			if err != nil {
+				fail("Failed to shell split Options (%s), error: %s", configs.Options, err)
+			}
+			options = opts
+		}
 
-	buildCmd := builder.BuildCommand()
-	buildCmd.SetStdout(os.Stdout)
-	buildCmd.SetStderr(os.Stderr)
-	buildCmd.SetStdin(strings.NewReader("y"))
+		for _, platform := range platforms {
+			cmdArgs := []string{"ionic"}
+			if ionicMajorVersion > 2 {
+				cmdArgs = append(cmdArgs, "cordova")
+			}
 
-	log.Donef("$ %s", buildCmd.PrintableCommandArgs())
+			cmdArgs = append(cmdArgs, "build")
 
-	if err := buildCmd.Run(); err != nil {
-		fail("ionic failed, error: %s", err)
+			if configs.Configuration != "" {
+				cmdArgs = append(cmdArgs, "--"+configs.Configuration)
+			}
+
+			if configs.Target != "" {
+				cmdArgs = append(cmdArgs, "--"+configs.Target)
+			}
+
+			cmdArgs = append(cmdArgs, platform)
+
+			if configs.BuildConfig != "" {
+				cmdArgs = append(cmdArgs, "--buildConfig", configs.BuildConfig)
+			}
+
+			cmdArgs = append(cmdArgs, options...)
+
+			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
+			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))
+
+			log.Donef("$ %s", cmd.PrintableCommandArgs())
+
+			if err := cmd.Run(); err != nil {
+				fail("command failed, error: %s", err)
+			}
+		}
 	}
 
 	// collect outputs
