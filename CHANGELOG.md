@@ -1,6 +1,13 @@
-## Changelog (Current version: 0.9.4)
+## Changelog (Current version: 0.9.5)
 
 -----------------
+
+### 0.9.5 (2017 Sep 06)
+
+* [104bb0b] prepare for 0.9.5
+* [367455d] ionic command update (#8)
+* [cd589b4] build android project as well
+* [2931133] do not fail if can not export .app file (#7)
 
 ### 0.9.4 (2017 Aug 09)
 
@@ -24,4 +31,4 @@
 
 -----------------
 
-Updated: 2017 Aug 09
+Updated: 2017 Sep 06
