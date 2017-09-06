@@ -326,7 +326,7 @@ func main() {
 			log.Donef("$ %s", cmd.PrintableCommandArgs())
 
 			if err := cmd.Run(); err != nil {
-				fail("ionic failed, error: %s", err)
+				fail("command failed, error: %s", err)
 			}
 		}
 	}
@@ -349,7 +349,7 @@ func main() {
 			log.Donef("$ %s", cmd.PrintableCommandArgs())
 
 			if err := cmd.Run(); err != nil {
-				fail("ionic failed, error: %s", err)
+				fail("command failed, error: %s", err)
 			}
 		}
 	}
@@ -395,7 +395,7 @@ func main() {
 			log.Donef("$ %s", cmd.PrintableCommandArgs())
 
 			if err := cmd.Run(); err != nil {
-				fail("ionic failed, error: %s", err)
+				fail("command failed, error: %s", err)
 			}
 		}
 	}
