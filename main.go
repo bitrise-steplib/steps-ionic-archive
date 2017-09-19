@@ -178,7 +178,7 @@ func ionicVersion() (string, error) {
 	}
 
 	// fix for ionic-cli intercative version output: `[1000D[K3.2.0`
-	pattern := `.*(?P<version>\d.\d.\d).*`
+	pattern := `(?P<version>\d+\.\d+\.\d+)`
 
 	reader := strings.NewReader(out)
 	scanner := bufio.NewScanner(reader)
