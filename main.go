@@ -153,6 +153,22 @@ func moveAndExportOutputs(outputs []string, deployDir, envKey string) (string, e
 	return outputToExport, nil
 }
 
+func npmRemovel(isGlobal bool, pkg ...string) error {
+	args := []string{"remove"}
+	if isGlobal {
+		args = append(args, "-g")
+	}
+	args = append(args, pkg...)
+	cmd := command.New("npm", args...)
+
+	log.Donef("$ %s", cmd.PrintableCommandArgs())
+
+	if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
+		return fmt.Errorf("command failed, output: %s, error: %s", out, err)
+	}
+	return nil
+}
+
 func npmInstall(isGlobal bool, pkg ...string) error {
 	args := []string{"install"}
 	if isGlobal {
@@ -169,8 +185,8 @@ func npmInstall(isGlobal bool, pkg ...string) error {
 	return nil
 }
 
-func ionicVersion() (string, error) {
-	cmd := command.New("ionic", "-v", "--no-interactive")
+func ionicVersion(bin string) (string, error) {
+	cmd := command.New(bin, "-v", "--no-interactive")
 	cmd.SetStdin(strings.NewReader("Y"))
 	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
@@ -257,9 +273,14 @@ func main() {
 		}
 	}
 
+	ionicBin := "ionic"
 	if configs.IonicVersion != "" {
 		fmt.Println()
 		log.Infof("Updating ionic version to: %s", configs.IonicVersion)
+
+		if err := npmRemovel(false, "ionic"); err != nil {
+			fail(err.Error())
+		}
 
 		if err := npmInstall(true, "ionic@"+configs.IonicVersion); err != nil {
 			fail(err.Error())
@@ -281,7 +302,7 @@ func main() {
 	fmt.Println()
 	log.Printf("cordova version: %s", colorstring.Green(cordovaVerStr))
 
-	ionicVerStr, err := ionicVersion()
+	ionicVerStr, err := ionicVersion(ionicBin)
 	if err != nil {
 		fail("Failed to get ionic version, error: %s", err)
 	}
@@ -311,7 +332,7 @@ func main() {
 	{
 		// platform rm
 		for _, platform := range platforms {
-			cmdArgs := []string{"ionic"}
+			cmdArgs := []string{ionicBin}
 			if ionicMajorVersion > 2 {
 				cmdArgs = append(cmdArgs, "cordova")
 			}
@@ -334,7 +355,7 @@ func main() {
 	{
 		// platform add
 		for _, platform := range platforms {
-			cmdArgs := []string{"ionic"}
+			cmdArgs := []string{ionicBin}
 			if ionicMajorVersion > 2 {
 				cmdArgs = append(cmdArgs, "cordova")
 			}
@@ -366,7 +387,7 @@ func main() {
 		}
 
 		for _, platform := range platforms {
-			cmdArgs := []string{"ionic"}
+			cmdArgs := []string{ionicBin}
 			if ionicMajorVersion > 2 {
 				cmdArgs = append(cmdArgs, "cordova")
 			}
