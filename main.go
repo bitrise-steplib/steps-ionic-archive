@@ -170,7 +170,7 @@ func npmInstall(isGlobal bool, pkg ...string) error {
 }
 
 func ionicVersion() (string, error) {
-	cmd := command.New("ionic", "-v")
+	cmd := command.New("ionic", "-v", "--no-interactive")
 	cmd.SetStdin(strings.NewReader("Y"))
 	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
@@ -318,7 +318,7 @@ func main() {
 
 			cmdArgs = append(cmdArgs, "platform", "rm")
 
-			cmdArgs = append(cmdArgs, platform)
+			cmdArgs = append(cmdArgs, platform, "--no-interactive")
 
 			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
 			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))
@@ -341,7 +341,7 @@ func main() {
 
 			cmdArgs = append(cmdArgs, "platform", "add")
 
-			cmdArgs = append(cmdArgs, platform)
+			cmdArgs = append(cmdArgs, platform, "--no-interactive")
 
 			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
 			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))
@@ -388,6 +388,7 @@ func main() {
 			}
 
 			cmdArgs = append(cmdArgs, options...)
+			cmdArgs = append(cmdArgs, "--no-interactive")
 
 			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
 			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))
