@@ -185,8 +185,8 @@ func npmInstall(isGlobal bool, pkg ...string) error {
 	return nil
 }
 
-func ionicVersion(bin string) (string, error) {
-	cmd := command.New(bin, "-v", "--no-interactive")
+func ionicVersion() (string, error) {
+	cmd := command.New("ionic", "-v")
 	cmd.SetStdin(strings.NewReader("Y"))
 	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
@@ -268,12 +268,15 @@ func main() {
 		fmt.Println()
 		log.Infof("Updating cordova version to: %s", configs.CordovaVersion)
 
+		if err := npmRemovel(false, "cordova"); err != nil {
+			fail(err.Error())
+		}
+
 		if err := npmInstall(true, "cordova@"+configs.CordovaVersion); err != nil {
 			fail(err.Error())
 		}
 	}
 
-	ionicBin := "ionic"
 	if configs.IonicVersion != "" {
 		fmt.Println()
 		log.Infof("Updating ionic version to: %s", configs.IonicVersion)
@@ -302,7 +305,7 @@ func main() {
 	fmt.Println()
 	log.Printf("cordova version: %s", colorstring.Green(cordovaVerStr))
 
-	ionicVerStr, err := ionicVersion(ionicBin)
+	ionicVerStr, err := ionicVersion()
 	if err != nil {
 		fail("Failed to get ionic version, error: %s", err)
 	}
@@ -332,14 +335,14 @@ func main() {
 	{
 		// platform rm
 		for _, platform := range platforms {
-			cmdArgs := []string{ionicBin}
+			cmdArgs := []string{"ionic"}
 			if ionicMajorVersion > 2 {
 				cmdArgs = append(cmdArgs, "cordova")
 			}
 
 			cmdArgs = append(cmdArgs, "platform", "rm")
 
-			cmdArgs = append(cmdArgs, platform, "--no-interactive")
+			cmdArgs = append(cmdArgs, platform)
 
 			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
 			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))
@@ -355,14 +358,14 @@ func main() {
 	{
 		// platform add
 		for _, platform := range platforms {
-			cmdArgs := []string{ionicBin}
+			cmdArgs := []string{"ionic"}
 			if ionicMajorVersion > 2 {
 				cmdArgs = append(cmdArgs, "cordova")
 			}
 
 			cmdArgs = append(cmdArgs, "platform", "add")
 
-			cmdArgs = append(cmdArgs, platform, "--no-interactive")
+			cmdArgs = append(cmdArgs, platform)
 
 			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
 			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))
@@ -387,7 +390,7 @@ func main() {
 		}
 
 		for _, platform := range platforms {
-			cmdArgs := []string{ionicBin}
+			cmdArgs := []string{"ionic"}
 			if ionicMajorVersion > 2 {
 				cmdArgs = append(cmdArgs, "cordova")
 			}
@@ -409,7 +412,7 @@ func main() {
 			}
 
 			cmdArgs = append(cmdArgs, options...)
-			cmdArgs = append(cmdArgs, "--no-interactive")
+			cmdArgs = append(cmdArgs)
 
 			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
 			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))
