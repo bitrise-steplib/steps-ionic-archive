@@ -305,21 +305,11 @@ func main() {
 
 	log.Printf("ionic version: %s", colorstring.Green(ionicVer.String()))
 
-	requiredLoginVer, err := ver.NewVersion("3.10.0")
-	if err != nil {
-		fail("Failed to create version from: 3.10.0, error: %s", err)
-	}
-
-	if !ionicVer.LessThan(requiredLoginVer) {
+	//
+	// ionic login
+	if configs.Username != "" && configs.Password != "" {
 		fmt.Println()
 		log.Infof("Ionic login")
-
-		if configs.Username == "" {
-			fail("ionic login is required from ionic-cli@3.10.0, but ionic_username not provided")
-		}
-		if configs.Password == "" {
-			fail("ionic login is required from ionic-cli@3.10.0, but ionic_password not provided")
-		}
 
 		cmdArgs := []string{"ionic", "login", configs.Username, configs.Password}
 		cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
