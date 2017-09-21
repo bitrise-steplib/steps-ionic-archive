@@ -1,6 +1,11 @@
-## Changelog (Current version: 0.9.5)
+## Changelog (Current version: 0.10.0)
 
 -----------------
+
+### 0.10.0 (2017 Sep 21)
+
+* [2ec115c] prepare for 0.10.0
+* [8c71cd4] ionic version regexp update (#12)
 
 ### 0.9.5 (2017 Sep 06)
 
@@ -31,4 +36,4 @@
 
 -----------------
 
-Updated: 2017 Sep 06
+Updated: 2017 Sep 21
