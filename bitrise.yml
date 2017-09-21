@@ -47,7 +47,9 @@ workflows:
         - workdir: ./
         - target: emulator
         - platform: ios,android
-        - ionic_version: latest
+        - ionic_version: "3.9.2"
+        - ionic_username: $IONIC_USERNAME
+        - ionic_password: $IONIC_PASSWORD
 
   go-tests:
     before_run:

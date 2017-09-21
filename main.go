@@ -17,6 +17,7 @@ import (
 	"github.com/bitrise-tools/go-steputils/tools"
 	ver "github.com/hashicorp/go-version"
 	shellquote "github.com/kballard/go-shellquote"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -33,41 +34,56 @@ const (
 
 // ConfigsModel ...
 type ConfigsModel struct {
-	WorkDir        string
-	BuildConfig    string
-	Platform       string
-	Configuration  string
-	Target         string
+	Platform      string
+	Configuration string
+	Target        string
+	BuildConfig   string
+	Options       string
+
+	Username string
+	Password string
+
 	CordovaVersion string
 	IonicVersion   string
-	Options        string
-	DeployDir      string
+
+	WorkDir   string
+	DeployDir string
 }
 
 func createConfigsModelFromEnvs() ConfigsModel {
 	return ConfigsModel{
-		WorkDir:        os.Getenv("workdir"),
-		BuildConfig:    os.Getenv("build_config"),
-		Platform:       os.Getenv("platform"),
-		Configuration:  os.Getenv("configuration"),
-		Target:         os.Getenv("target"),
+		Platform:      os.Getenv("platform"),
+		Configuration: os.Getenv("configuration"),
+		Target:        os.Getenv("target"),
+		BuildConfig:   os.Getenv("build_config"),
+		Options:       os.Getenv("options"),
+
+		Username: os.Getenv("ionic_username"),
+		Password: os.Getenv("ionic_password"),
+
 		CordovaVersion: os.Getenv("cordova_version"),
 		IonicVersion:   os.Getenv("ionic_version"),
-		Options:        os.Getenv("options"),
-		DeployDir:      os.Getenv("BITRISE_DEPLOY_DIR"),
+
+		WorkDir:   os.Getenv("workdir"),
+		DeployDir: os.Getenv("BITRISE_DEPLOY_DIR"),
 	}
 }
 
 func (configs ConfigsModel) print() {
 	log.Infof("Configs:")
-	log.Printf("- WorkDir: %s", configs.WorkDir)
-	log.Printf("- BuildConfig: %s", configs.BuildConfig)
 	log.Printf("- Platform: %s", configs.Platform)
 	log.Printf("- Configuration: %s", configs.Configuration)
 	log.Printf("- Target: %s", configs.Target)
+	log.Printf("- BuildConfig: %s", configs.BuildConfig)
+	log.Printf("- Options: %s", configs.Options)
+
+	log.Printf("- Username: %s", input.SecureInput(configs.Username))
+	log.Printf("- Username: %s", input.SecureInput(configs.Password))
+
 	log.Printf("- CordovaVersion: %s", configs.CordovaVersion)
 	log.Printf("- IonicVersion: %s", configs.IonicVersion)
-	log.Printf("- Options: %s", configs.Options)
+
+	log.Printf("- WorkDir: %s", configs.WorkDir)
 	log.Printf("- DeployDir: %s", configs.DeployDir)
 }
 
@@ -153,55 +169,48 @@ func moveAndExportOutputs(outputs []string, deployDir, envKey string) (string, e
 	return outputToExport, nil
 }
 
-func npmInstall(isGlobal bool, pkg ...string) error {
-	args := []string{"install"}
-	if isGlobal {
-		args = append(args, "-g")
-	}
-	args = append(args, pkg...)
-	cmd := command.New("npm", args...)
-
-	log.Donef("$ %s", cmd.PrintableCommandArgs())
-
-	if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
-		return fmt.Errorf("command failed, output: %s, error: %s", out, err)
-	}
-	return nil
-}
-
-func ionicVersion() (string, error) {
+func ionicVersion() (*ver.Version, error) {
 	cmd := command.New("ionic", "-v")
 	cmd.SetStdin(strings.NewReader("Y"))
 	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// fix for ionic-cli intercative version output: `[1000D[K3.2.0`
-	pattern := `.*(?P<version>\d.\d.\d).*`
+	pattern := `(?P<version>\d+\.\d+\.\d+)`
 
 	reader := strings.NewReader(out)
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
 		line := scanner.Text()
 		if match := regexp.MustCompile(pattern).FindStringSubmatch(line); len(match) == 2 {
-			return match[1], nil
+			versionStr := match[1]
+			version, err := ver.NewVersion(versionStr)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to parse version: %s", versionStr)
+			}
+			return version, nil
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return "", fmt.Errorf("output: %s", out)
+	return nil, fmt.Errorf("output: %s", out)
 }
 
-func cordovaVersion() (string, error) {
+func cordovaVersion() (*ver.Version, error) {
 	cmd := command.New("cordova", "-v")
 	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return out, nil
+	version, err := ver.NewVersion(out)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse version: %s", out)
+	}
+	return version, nil
 }
 
 func fail(format string, v ...interface{}) {
@@ -252,8 +261,12 @@ func main() {
 		fmt.Println()
 		log.Infof("Updating cordova version to: %s", configs.CordovaVersion)
 
+		if err := npmRemove(false, "cordova"); err != nil {
+			fail("Failed to remove cordova, error: %s", err)
+		}
+
 		if err := npmInstall(true, "cordova@"+configs.CordovaVersion); err != nil {
-			fail(err.Error())
+			fail("Failed to install cordova, error: %s", err)
 		}
 	}
 
@@ -261,8 +274,12 @@ func main() {
 		fmt.Println()
 		log.Infof("Updating ionic version to: %s", configs.IonicVersion)
 
+		if err := npmRemove(false, "ionic"); err != nil {
+			fail("Failed to remove ionic, error: %s", err)
+		}
+
 		if err := npmInstall(true, "ionic@"+configs.IonicVersion); err != nil {
-			fail(err.Error())
+			fail("Failed to install ionic, error: %s", err)
 		}
 	}
 
@@ -273,29 +290,50 @@ func main() {
 	}
 
 	// Print cordova and ionic version
-	cordovaVerStr, err := cordovaVersion()
+	cordovaVer, err := cordovaVersion()
 	if err != nil {
 		fail("Failed to get cordova version, error: %s", err)
 	}
 
 	fmt.Println()
-	log.Printf("cordova version: %s", colorstring.Green(cordovaVerStr))
+	log.Printf("cordova version: %s", colorstring.Green(cordovaVer.String()))
 
-	ionicVerStr, err := ionicVersion()
+	ionicVer, err := ionicVersion()
 	if err != nil {
 		fail("Failed to get ionic version, error: %s", err)
 	}
 
-	log.Printf("ionic version: %s", colorstring.Green(ionicVerStr))
+	log.Printf("ionic version: %s", colorstring.Green(ionicVer.String()))
 
-	ionicVer, err := ver.NewVersion(ionicVerStr)
+	requiredLoginVer, err := ver.NewVersion("3.10.0")
 	if err != nil {
-		fail("Failed to parse ionic version, error: %s", err)
+		fail("Failed to create version from: 3.10.0, error: %s", err)
+	}
+
+	if !ionicVer.LessThan(requiredLoginVer) {
+		fmt.Println()
+		log.Infof("Ionic login")
+
+		if configs.Username == "" {
+			fail("ionic login is required from ionic-cli@3.10.0, but ionic_username not provided")
+		}
+		if configs.Password == "" {
+			fail("ionic login is required from ionic-cli@3.10.0, but ionic_password not provided")
+		}
+
+		cmdArgs := []string{"ionic", "login", configs.Username, configs.Password}
+		cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
+		cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))
+
+		log.Donef("$ ionic login *** ***")
+
+		if err := cmd.Run(); err != nil {
+			fail("command failed, error: %s", err)
+		}
 	}
 
 	ionicMajorVersion := ionicVer.Segments()[0]
 
-	//
 	platforms := []string{}
 	if configs.Platform != "" {
 		platformsSplit := strings.Split(configs.Platform, ",")
@@ -388,6 +426,7 @@ func main() {
 			}
 
 			cmdArgs = append(cmdArgs, options...)
+			cmdArgs = append(cmdArgs)
 
 			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
 			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))
