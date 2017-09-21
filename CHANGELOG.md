@@ -1,6 +1,11 @@
-## Changelog (Current version: 0.10.0)
+## Changelog (Current version: 1.0.0)
 
 -----------------
+
+### 1.0.0 (2017 Sep 21)
+
+* [8c94da2] prepare for 1.0.0
+* [ebe7cfb] login if user name and password provided (#14)
 
 ### 0.10.0 (2017 Sep 21)
 
