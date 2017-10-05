@@ -43,8 +43,11 @@ type ConfigsModel struct {
 	Username string
 	Password string
 
-	CordovaVersion string
-	IonicVersion   string
+	CordovaVersion        string
+	IonicVersion          string
+	CordovaIosVersion     string
+	CordovaAndroidVersion string
+
 
 	WorkDir   string
 	DeployDir string
@@ -61,8 +64,10 @@ func createConfigsModelFromEnvs() ConfigsModel {
 		Username: os.Getenv("ionic_username"),
 		Password: os.Getenv("ionic_password"),
 
-		CordovaVersion: os.Getenv("cordova_version"),
-		IonicVersion:   os.Getenv("ionic_version"),
+		CordovaVersion:        os.Getenv("cordova_version"),
+		IonicVersion:          os.Getenv("ionic_version"),
+		CordovaIosVersion:     os.Getenv("cordova_ios_version"),
+		CordovaAndroidVersion: os.Getenv("cordova_android_version"),
 
 		WorkDir:   os.Getenv("workdir"),
 		DeployDir: os.Getenv("BITRISE_DEPLOY_DIR"),
@@ -78,9 +83,11 @@ func (configs ConfigsModel) print() {
 	log.Printf("- Options: %s", configs.Options)
 
 	log.Printf("- Username: %s", input.SecureInput(configs.Username))
-	log.Printf("- Username: %s", input.SecureInput(configs.Password))
+	log.Printf("- Password: %s", input.SecureInput(configs.Password))
 
 	log.Printf("- CordovaVersion: %s", configs.CordovaVersion)
+	log.Printf("- Cordova Android Version: %s", configs.CordovaAndroidVersion)
+	log.Printf("- Cordova iOS Version: %s", configs.CordovaIosVersion)
 	log.Printf("- IonicVersion: %s", configs.IonicVersion)
 
 	log.Printf("- WorkDir: %s", configs.WorkDir)
@@ -369,7 +376,15 @@ func main() {
 
 			cmdArgs = append(cmdArgs, "platform", "add")
 
-			cmdArgs = append(cmdArgs, platform)
+			var platformVersion = "latest"
+			if configs.CordovaIosVersion == "master" {
+				platformVersion = "https://github.com/apache/cordova-"+platform
+			} else {
+				platformVersion = platform+"@"+configs.CordovaIosVersion
+			}
+
+			log.Donef("$ %s", platformVersion)
+			cmdArgs = append(cmdArgs, platformVersion)
 
 			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
 			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))

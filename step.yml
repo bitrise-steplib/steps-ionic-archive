@@ -101,6 +101,22 @@ inputs:
 
         If value is set to `latest`, the step will update to the latest ionic version.
         Leave this input empty to use the preinstalled ionic version.
+  - cordova_ios_version: $CORDOVA_IOS_VERSION
+    opts:
+      title: "iOS version"
+      description: |-
+        The version of cordova-ios plugin you want to use.
+
+        If value is set to `latest`, the step will update to the latest ionic version.
+        Leave this input empty to use the preinstalled ionic version.
+  - cordova_android_version: $CORDOVA_ANDROID_VERSION
+    opts:
+      title: "Android version"
+      description: |-
+        The version of cordova-android plugin you want to use.
+
+        If value is set to `latest`, the step will update to the latest ionic version.
+        Leave this input empty to use the preinstalled ionic version.
   - workdir: $BITRISE_SOURCE_DIR
     opts:
       title: "Working directory"
