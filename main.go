@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"reflect"
 
 	"github.com/bitrise-io/go-utils/colorstring"
 	"github.com/bitrise-io/go-utils/command"
@@ -225,6 +226,12 @@ func fail(format string, v ...interface{}) {
 	os.Exit(1)
 }
 
+func getField(c ConfigsModel, field string) string {
+	r := reflect.ValueOf(c)
+	f := reflect.Indirect(r).FieldByName(field)
+	return string(f.String())
+}
+
 func main() {
 	configs := createConfigsModelFromEnvs()
 
@@ -376,11 +383,13 @@ func main() {
 
 			cmdArgs = append(cmdArgs, "platform", "add")
 
-			var platformVersion = "latest"
-			if configs.CordovaIosVersion == "master" {
-				platformVersion = "https://github.com/apache/cordova-"+platform
-			} else {
-				platformVersion = platform+"@"+configs.CordovaIosVersion
+			platformVersion := platform
+
+			pv := getField( configs, "Cordova"+strings.Title(platform) +"Version")
+			if pv == "master" {
+				platformVersion = "https://github.com/apache/cordova-"+platform+".git"
+			} else if pv != "" {
+				platformVersion = platform+"@"+pv
 			}
 
 			log.Donef("$ %s", platformVersion)
