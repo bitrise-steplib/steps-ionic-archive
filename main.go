@@ -38,6 +38,7 @@ type ConfigsModel struct {
 	Configuration string
 	Target        string
 	BuildConfig   string
+	ReAddPlatform string
 	Options       string
 
 	Username string
@@ -56,6 +57,7 @@ func createConfigsModelFromEnvs() ConfigsModel {
 		Configuration: os.Getenv("configuration"),
 		Target:        os.Getenv("target"),
 		BuildConfig:   os.Getenv("build_config"),
+		ReAddPlatform: os.Getenv("readd_platform"),
 		Options:       os.Getenv("options"),
 
 		Username: os.Getenv("ionic_username"),
@@ -75,6 +77,7 @@ func (configs ConfigsModel) print() {
 	log.Printf("- Configuration: %s", configs.Configuration)
 	log.Printf("- Target: %s", configs.Target)
 	log.Printf("- BuildConfig: %s", configs.BuildConfig)
+	log.Printf("- ReAddPlatform: %s", configs.ReAddPlatform)
 	log.Printf("- Options: %s", configs.Options)
 
 	log.Printf("- Username: %s", input.SecureInput(configs.Username))
@@ -94,6 +97,10 @@ func (configs ConfigsModel) validate() error {
 
 	if err := input.ValidateWithOptions(configs.Platform, "ios,android", "ios", "android"); err != nil {
 		return fmt.Errorf("Platform: %s", err)
+	}
+
+	if err := input.ValidateWithOptions(configs.ReAddPlatform, "true", "false"); err != nil {
+		return fmt.Errorf("ReAddPlatform: %s", err)
 	}
 
 	if err := input.ValidateIfNotEmpty(configs.Configuration); err != nil {
@@ -336,7 +343,7 @@ func main() {
 	fmt.Println()
 	log.Infof("Building project")
 
-	{
+	if configs.ReAddPlatform == "true" {
 		// platform rm
 		for _, platform := range platforms {
 			cmdArgs := []string{"ionic"}
