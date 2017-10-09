@@ -51,6 +51,7 @@ workflows:
         - ionic_username: $IONIC_USERNAME
         - ionic_password: $IONIC_PASSWORD
         - cordova_ios_version: master
+        - cordova_android_version: latest
 
   go-tests:
     before_run:
