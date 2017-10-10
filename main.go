@@ -295,6 +295,12 @@ func main() {
 		if err := npmInstall(true, "ionic@"+configs.IonicVersion); err != nil {
 			fail("Failed to install ionic, error: %s", err)
 		}
+
+		fmt.Println()
+		log.Infof("Installing local ionic cli")
+		if err := npmInstall(false, "ionic@"+configs.IonicVersion); err != nil {
+			fail("command failed, error: %s", err)
+		}
 	}
 
 	fmt.Println()
