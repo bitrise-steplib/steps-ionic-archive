@@ -17,7 +17,7 @@ workflows:
             #!/bin/bash
             set -e
             set -v
-#            rm -rf ./_tmp
+            rm -rf ./_tmp
     - change-workdir:
         title: Switch working dir to ./_tmp dir
         run_if: true
