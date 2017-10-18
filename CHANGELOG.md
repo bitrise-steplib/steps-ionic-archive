@@ -1,6 +1,12 @@
-## Changelog (Current version: 1.0.0)
+## Changelog (Current version: 1.1.0)
 
 -----------------
+
+### 1.1.0 (2017 Oct 18)
+
+* [5a49c42] prepare for 1.1.0
+* [7a65316] Updates (#18)
+* [38cf1da] Specify versions of ios and android plugins (#16)
 
 ### 1.0.0 (2017 Sep 21)
 
@@ -41,4 +47,4 @@
 
 -----------------
 
-Updated: 2017 Sep 21
+Updated: 2017 Oct 18
