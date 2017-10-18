@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"reflect"
 
 	"github.com/bitrise-io/go-utils/colorstring"
 	"github.com/bitrise-io/go-utils/command"
@@ -43,8 +44,11 @@ type ConfigsModel struct {
 	Username string
 	Password string
 
-	CordovaVersion string
-	IonicVersion   string
+	CordovaVersion        string
+	IonicVersion          string
+	CordovaIosVersion     string
+	CordovaAndroidVersion string
+
 
 	WorkDir   string
 	DeployDir string
@@ -61,8 +65,10 @@ func createConfigsModelFromEnvs() ConfigsModel {
 		Username: os.Getenv("ionic_username"),
 		Password: os.Getenv("ionic_password"),
 
-		CordovaVersion: os.Getenv("cordova_version"),
-		IonicVersion:   os.Getenv("ionic_version"),
+		CordovaVersion:        os.Getenv("cordova_version"),
+		IonicVersion:          os.Getenv("ionic_version"),
+		CordovaIosVersion:     os.Getenv("cordova_ios_version"),
+		CordovaAndroidVersion: os.Getenv("cordova_android_version"),
 
 		WorkDir:   os.Getenv("workdir"),
 		DeployDir: os.Getenv("BITRISE_DEPLOY_DIR"),
@@ -78,9 +84,11 @@ func (configs ConfigsModel) print() {
 	log.Printf("- Options: %s", configs.Options)
 
 	log.Printf("- Username: %s", input.SecureInput(configs.Username))
-	log.Printf("- Username: %s", input.SecureInput(configs.Password))
+	log.Printf("- Password: %s", input.SecureInput(configs.Password))
 
 	log.Printf("- CordovaVersion: %s", configs.CordovaVersion)
+	log.Printf("- Cordova Android Version: %s", configs.CordovaAndroidVersion)
+	log.Printf("- Cordova iOS Version: %s", configs.CordovaIosVersion)
 	log.Printf("- IonicVersion: %s", configs.IonicVersion)
 
 	log.Printf("- WorkDir: %s", configs.WorkDir)
@@ -218,6 +226,12 @@ func fail(format string, v ...interface{}) {
 	os.Exit(1)
 }
 
+func getField(c ConfigsModel, field string) string {
+	r := reflect.ValueOf(c)
+	f := reflect.Indirect(r).FieldByName(field)
+	return string(f.String())
+}
+
 func main() {
 	configs := createConfigsModelFromEnvs()
 
@@ -280,6 +294,12 @@ func main() {
 
 		if err := npmInstall(true, "ionic@"+configs.IonicVersion); err != nil {
 			fail("Failed to install ionic, error: %s", err)
+		}
+
+		fmt.Println()
+		log.Infof("Installing local ionic cli")
+		if err := npmInstall(false, "ionic@"+configs.IonicVersion); err != nil {
+			fail("command failed, error: %s", err)
 		}
 	}
 
@@ -369,7 +389,17 @@ func main() {
 
 			cmdArgs = append(cmdArgs, "platform", "add")
 
-			cmdArgs = append(cmdArgs, platform)
+			platformVersion := platform
+
+			pv := getField( configs, "Cordova"+strings.Title(platform) +"Version")
+			if pv == "master" {
+				platformVersion = "https://github.com/apache/cordova-"+platform+".git"
+			} else if pv != "" {
+				platformVersion = platform+"@"+pv
+			}
+
+			log.Donef("$ %s", platformVersion)
+			cmdArgs = append(cmdArgs, platformVersion)
 
 			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
 			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))

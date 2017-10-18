@@ -101,6 +101,36 @@ inputs:
 
         If value is set to `latest`, the step will update to the latest ionic version.
         Leave this input empty to use the preinstalled ionic version.
+  - cordova_ios_version: $CORDOVA_IOS_VERSION
+    opts:
+      title: "iOS version"
+      description: |-
+        The version of cordova-ios plugin you want to use.
+
+        Should be one of the following:
+
+        - x.x.x - [A specific release](https://github.com/apache/cordova-ios/releases) equivalent to doing `ionic cordova platform add ios@x.x.x`
+
+        - Master - will use the master branch of the repo, equivalent to doing `ionic cordova platform add https://github.com/apache/cordova-ios.git`
+
+        - Latest - The step will update to the latest cordova-ios version `ionic cordova platform add ios@latest`.
+
+        - Empty - Uses the pinned cordova-ios version.
+  - cordova_android_version: $CORDOVA_ANDROID_VERSION
+    opts:
+      title: "Android version"
+      description: |-
+        The version of cordova-android plugin you want to use.
+
+        Should be one of the following:
+
+        - x.x.x - [A specific release](https://github.com/apache/cordova-android/releases) equivalent to doing `ionic cordova platform add android@x.x.x`
+
+        - Master - will use the master branch of the repo, equivalent to doing `ionic cordova platform add https://github.com/apache/cordova-android.git`
+
+        - Latest - The step will update to the latest cordova-android version `ionic cordova platform add android@latest`.
+
+        - Empty - Uses the pinned cordova-android version.
   - workdir: $BITRISE_SOURCE_DIR
     opts:
       title: "Working directory"
