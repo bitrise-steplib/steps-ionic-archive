@@ -31,7 +31,7 @@ workflows:
         - clone_into_dir: ./
         - commit: ""
         - tag: ""
-        - branch: "update"
+        - branch: "master"
         - pull_request_id: ""
         - clone_depth: ""
     - script:
@@ -51,7 +51,6 @@ workflows:
         - ionic_username: $IONIC_USERNAME
         - ionic_password: $IONIC_PASSWORD
         - cordova_ios_version: "master"
-#        - cordova_android_version: latest
 
   go-tests:
     before_run:
@@ -109,22 +108,20 @@ workflows:
 
   # ----------------------------------------------------------------
   # --- Utility workflows
-  godeps-update:
-    title: Godeps update
+  dep-update:
+    title: Dep update
     description: |
-      Used for updating bitrise dependencies with godep
+      Used for updating bitrise dependencies with dep
     steps:
     - script:
         title: Dependency update
         inputs:
-        - content: |
+        - content: |-
             #!/bin/bash
             set -ex
-            go get -u -v github.com/tools/godep
-            rm -rf ./Godeps
-            rm -rf ./vendor
-            go get -t -d ./...
-            godep save ./...
+            go get -u -v github.com/golang/dep/cmd/dep
+            dep ensure -v
+            dep ensure -v -update
 
   # ----------------------------------------------------------------
   # --- workflows for Releasing
