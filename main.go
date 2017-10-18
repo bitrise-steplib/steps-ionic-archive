@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strings"
-	"reflect"
 
 	"github.com/bitrise-io/go-utils/colorstring"
 	"github.com/bitrise-io/go-utils/command"
@@ -44,11 +44,10 @@ type ConfigsModel struct {
 	Username string
 	Password string
 
-	CordovaVersion        string
 	IonicVersion          string
+	CordovaVersion        string
 	CordovaIosVersion     string
 	CordovaAndroidVersion string
-
 
 	WorkDir   string
 	DeployDir string
@@ -65,8 +64,8 @@ func createConfigsModelFromEnvs() ConfigsModel {
 		Username: os.Getenv("ionic_username"),
 		Password: os.Getenv("ionic_password"),
 
-		CordovaVersion:        os.Getenv("cordova_version"),
 		IonicVersion:          os.Getenv("ionic_version"),
+		CordovaVersion:        os.Getenv("cordova_version"),
 		CordovaIosVersion:     os.Getenv("cordova_ios_version"),
 		CordovaAndroidVersion: os.Getenv("cordova_android_version"),
 
@@ -86,10 +85,10 @@ func (configs ConfigsModel) print() {
 	log.Printf("- Username: %s", input.SecureInput(configs.Username))
 	log.Printf("- Password: %s", input.SecureInput(configs.Password))
 
-	log.Printf("- CordovaVersion: %s", configs.CordovaVersion)
-	log.Printf("- Cordova Android Version: %s", configs.CordovaAndroidVersion)
-	log.Printf("- Cordova iOS Version: %s", configs.CordovaIosVersion)
 	log.Printf("- IonicVersion: %s", configs.IonicVersion)
+	log.Printf("- CordovaVersion: %s", configs.CordovaVersion)
+	log.Printf("- CordovaIosVersion: %s", configs.CordovaIosVersion)
+	log.Printf("- CordovaAndroidVersion: %s", configs.CordovaAndroidVersion)
 
 	log.Printf("- WorkDir: %s", configs.WorkDir)
 	log.Printf("- DeployDir: %s", configs.DeployDir)
@@ -390,15 +389,13 @@ func main() {
 			cmdArgs = append(cmdArgs, "platform", "add")
 
 			platformVersion := platform
-
-			pv := getField( configs, "Cordova"+strings.Title(platform) +"Version")
+			pv := getField(configs, "Cordova"+strings.Title(platform)+"Version")
 			if pv == "master" {
-				platformVersion = "https://github.com/apache/cordova-"+platform+".git"
+				platformVersion = "https://github.com/apache/cordova-" + platform + ".git"
 			} else if pv != "" {
-				platformVersion = platform+"@"+pv
+				platformVersion = platform + "@" + pv
 			}
 
-			log.Donef("$ %s", platformVersion)
 			cmdArgs = append(cmdArgs, platformVersion)
 
 			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)

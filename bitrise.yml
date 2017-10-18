@@ -31,7 +31,7 @@ workflows:
         - clone_into_dir: ./
         - commit: ""
         - tag: ""
-        - branch: "update"
+        - branch: "master"
         - pull_request_id: ""
         - clone_depth: ""
     - script:
@@ -51,7 +51,6 @@ workflows:
         - ionic_username: $IONIC_USERNAME
         - ionic_password: $IONIC_PASSWORD
         - cordova_ios_version: "master"
-#        - cordova_android_version: latest
 
   go-tests:
     before_run:

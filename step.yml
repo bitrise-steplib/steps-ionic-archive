@@ -85,14 +85,6 @@ inputs:
       title: "Ionic password"
       description: |-
         Use `Ionic username` and `Ionic password` to login with ioni-cli.
-  - cordova_version: 
-    opts:
-      title: "Cordova version"
-      description: |-
-        The version of cordova you want to use.
-
-        If value is set to `latest`, the step will update to the latest cordova version.
-        Leave this input empty to use the preinstalled cordova version.
   - ionic_version: 
     opts:
       title: "Ionic version"
@@ -101,7 +93,15 @@ inputs:
 
         If value is set to `latest`, the step will update to the latest ionic version.
         Leave this input empty to use the preinstalled ionic version.
-  - cordova_ios_version: $CORDOVA_IOS_VERSION
+  - cordova_version: 
+    opts:
+      title: "Cordova version"
+      description: |-
+        The version of cordova you want to use.
+
+        If value is set to `latest`, the step will update to the latest cordova version.
+        Leave this input empty to use the preinstalled cordova version.
+  - cordova_ios_version: 
     opts:
       title: "iOS version"
       description: |-
@@ -111,12 +111,12 @@ inputs:
 
         - x.x.x - [A specific release](https://github.com/apache/cordova-ios/releases) equivalent to doing `ionic cordova platform add ios@x.x.x`
 
-        - Master - will use the master branch of the repo, equivalent to doing `ionic cordova platform add https://github.com/apache/cordova-ios.git`
+        - master - will use the master branch of the repo, equivalent to doing `ionic cordova platform add https://github.com/apache/cordova-ios.git`
 
-        - Latest - The step will update to the latest cordova-ios version `ionic cordova platform add ios@latest`.
+        - latest - The step will update to the latest cordova-ios version `ionic cordova platform add ios@latest`.
 
-        - Empty - Uses the pinned cordova-ios version.
-  - cordova_android_version: $CORDOVA_ANDROID_VERSION
+        - empty - Uses the pinned cordova-ios version.
+  - cordova_android_version: 
     opts:
       title: "Android version"
       description: |-
@@ -126,11 +126,11 @@ inputs:
 
         - x.x.x - [A specific release](https://github.com/apache/cordova-android/releases) equivalent to doing `ionic cordova platform add android@x.x.x`
 
-        - Master - will use the master branch of the repo, equivalent to doing `ionic cordova platform add https://github.com/apache/cordova-android.git`
+        - master - will use the master branch of the repo, equivalent to doing `ionic cordova platform add https://github.com/apache/cordova-android.git`
 
-        - Latest - The step will update to the latest cordova-android version `ionic cordova platform add android@latest`.
+        - latest - The step will update to the latest cordova-android version `ionic cordova platform add android@latest`.
 
-        - Empty - Uses the pinned cordova-android version.
+        - empty - Uses the pinned cordova-android version.
   - workdir: $BITRISE_SOURCE_DIR
     opts:
       title: "Working directory"
