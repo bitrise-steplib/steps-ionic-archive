@@ -115,36 +115,36 @@ func (configs ConfigsModel) validate() error {
 	return nil
 }
 
-func moveAndExportOutputs(outputs []string, deployDir, envKey string, envListKey string) (string, error, []string) {
+func moveAndExportOutputs(outputs []string, deployDir, envKey string, envListKey string) (string, []string, error) {
 	outputToExport := ""
 	APKPaths := make([]string, len(outputs))
 	for x, output := range outputs {
 		info, err := os.Lstat(output)
 		if err != nil {
-			return "", err, []string{}
+			return "", []string{}, err
 		}
 
 		if info.Mode()&os.ModeSymlink != 0 {
 			resolvedPth, err := os.Readlink(output)
 			if err != nil {
-				return "", err, []string{}
+				return "", []string{}, err
 			}
 
 			log.Warnf("Output: %s is a symlink to: %s", output, resolvedPth)
 
 			if exist, err := pathutil.IsPathExists(resolvedPth); err != nil {
-				return "", err, []string{}
+				return "", []string{}, err
 			} else if !exist {
-				return "", fmt.Errorf("resolved path: %s does not exist", resolvedPth), []string{}
+				return "", []string{}, fmt.Errorf("resolved path: %s does not exist", resolvedPth)
 			}
 
 			resolvedInfo, err := os.Lstat(resolvedPth)
 			if err != nil {
-				return "", err, []string{}
+				return "", []string{}, err
 			}
 
 			if resolvedInfo.Mode()&os.ModeSymlink != 0 {
-				return "", fmt.Errorf("resolved path: %s is still symlink", resolvedPth), []string{}
+				return "", []string{}, fmt.Errorf("resolved path: %s is still symlink", resolvedPth)
 			}
 
 			output = resolvedPth
@@ -156,11 +156,11 @@ func moveAndExportOutputs(outputs []string, deployDir, envKey string, envListKey
 
 		if info.IsDir() {
 			if err := command.CopyDir(output, destinationPth, false); err != nil {
-				return "", err, []string{}
+				return "", []string{}, err
 			}
 		} else {
 			if err := command.CopyFile(output, destinationPth); err != nil {
-				return "", err, []string{}
+				return "", []string{}, err
 			}
 		}
 
@@ -169,19 +169,19 @@ func moveAndExportOutputs(outputs []string, deployDir, envKey string, envListKey
 	}
 
 	if outputToExport == "" {
-		return "", nil, []string{}
+		return "", []string{}, nil
 	}
 
 	if err := tools.ExportEnvironmentWithEnvman(envKey, outputToExport); err != nil {
-		return "", err, []string{}
+		return "", []string{}, err
 	}
 
 
 	if err := tools.ExportEnvironmentWithEnvman(envListKey, strings.Join(APKPaths, "|")); err != nil {
-		return "", err, []string{}
+		return "", []string{}, err
 	}
 
-	return outputToExport, nil, APKPaths
+	return outputToExport, APKPaths, nil
 }
 
 func ionicVersion() (*ver.Version, error) {
@@ -484,7 +484,7 @@ func main() {
 		}
 
 		if len(ipas) > 0 {
-			if exportedPth, err, _ := moveAndExportOutputs(ipas, configs.DeployDir, ipaPathEnvKey, apkPathListEnvKey); err != nil {
+			if exportedPth, _, err := moveAndExportOutputs(ipas, configs.DeployDir, ipaPathEnvKey, apkPathListEnvKey); err != nil {
 				fail("Failed to export ipas, error: %s", err)
 			} else if exportedPth != "" {
 				log.Donef("The ipa path is now available in the Environment Variable: %s (value: %s)", ipaPathEnvKey, exportedPth)
@@ -500,7 +500,7 @@ func main() {
 		}
 
 		if len(dsyms) > 0 {
-			if exportedPth, err, _ := moveAndExportOutputs(dsyms, configs.DeployDir, dsymDirPathEnvKey, apkPathListEnvKey); err != nil {
+			if exportedPth, _, err := moveAndExportOutputs(dsyms, configs.DeployDir, dsymDirPathEnvKey, apkPathListEnvKey); err != nil {
 				fail("Failed to export dsyms, error: %s", err)
 			} else if exportedPth != "" {
 				log.Donef("The dsym dir path is now available in the Environment Variable: %s (value: %s)", dsymDirPathEnvKey, exportedPth)
@@ -527,7 +527,7 @@ func main() {
 		}
 
 		if len(apps) > 0 {
-			if exportedPth, err, _ := moveAndExportOutputs(apps, configs.DeployDir, appDirPathEnvKey, apkPathListEnvKey); err != nil {
+			if exportedPth, _, err := moveAndExportOutputs(apps, configs.DeployDir, appDirPathEnvKey, apkPathListEnvKey); err != nil {
 				log.Warnf("Failed to export apps, error: %s", err)
 			} else if exportedPth != "" {
 				log.Donef("The app dir path is now available in the Environment Variable: %s (value: %s)", appDirPathEnvKey, exportedPth)
@@ -564,7 +564,7 @@ func main() {
 		}
 
 		if len(apks) > 0 {
-			if exportedPth, err, exportedPaths := moveAndExportOutputs(apks, configs.DeployDir, apkPathEnvKey, apkPathListEnvKey); err != nil {
+			if exportedPth, exportedPaths, err := moveAndExportOutputs(apks, configs.DeployDir, apkPathEnvKey, apkPathListEnvKey); err != nil {
 				fail("Failed to export apks, error: %s", err)
 			} else if exportedPth != "" {
 				log.Donef("The apk path is now available in the Environment Variable: %s (value: %s)", apkPathEnvKey, exportedPth)
