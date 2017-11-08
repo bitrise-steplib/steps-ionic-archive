@@ -1,6 +1,10 @@
-## Changelog (Current version: 1.1.0)
+## Changelog (Current version: 1.2.0)
 
 -----------------
+
+### 1.2.0 (2017 Nov 08)
+
+* [222703b] Added feature to export multiple APK files to BITRISE_APK_PATH_LIST (#19)
 
 ### 1.1.0 (2017 Oct 18)
 
@@ -47,4 +51,4 @@
 
 -----------------
 
-Updated: 2017 Oct 18
+Updated: 2017 Nov 08
