@@ -30,7 +30,7 @@ const (
 	dsymDirPathEnvKey = "BITRISE_DSYM_DIR_PATH"
 	dsymZipPathEnvKey = "BITRISE_DSYM_PATH"
 
-	apkPathEnvKey = "BITRISE_APK_PATH"
+	apkPathEnvKey     = "BITRISE_APK_PATH"
 	apkPathListEnvKey = "BITRISE_APK_PATH_LIST"
 )
 
@@ -176,7 +176,6 @@ func moveAndExportOutputs(outputs []string, deployDir, envKey string, envListKey
 		return "", []string{}, err
 	}
 
-
 	if err := tools.ExportEnvironmentWithEnvman(envListKey, strings.Join(APKPaths, "|")); err != nil {
 		return "", []string{}, err
 	}
@@ -310,12 +309,6 @@ func main() {
 		}
 	}
 
-	fmt.Println()
-	log.Infof("Installing cordova and angular plugins")
-	if err := npmInstall(false, "@ionic/cli-plugin-ionic-angular@latest", "@ionic/cli-plugin-cordova@latest"); err != nil {
-		fail("command failed, error: %s", err)
-	}
-
 	// Print cordova and ionic version
 	cordovaVer, err := cordovaVersion()
 	if err != nil {
@@ -331,6 +324,20 @@ func main() {
 	}
 
 	log.Printf("ionic version: %s", colorstring.Green(ionicVer.String()))
+
+	// Ionic CLI plugins angular and cordova have been marked as deprecated for
+	// version 3.8.0 and above.
+	ionicVerConstraint, err := ver.NewConstraint("< 3.8.0")
+	if err != nil {
+		fail("Could not create version constraint for ionic: %s", err)
+	}
+	if ionicVerConstraint.Check(ionicVer) {
+		fmt.Println()
+		log.Infof("Installing cordova and angular plugins")
+		if err := npmInstall(false, "@ionic/cli-plugin-ionic-angular@latest", "@ionic/cli-plugin-cordova@latest"); err != nil {
+			fail("command failed, error: %s", err)
+		}
+	}
 
 	//
 	// ionic login
