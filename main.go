@@ -238,6 +238,19 @@ func getField(c ConfigsModel, field string) string {
 	return string(f.String())
 }
 
+func find(path, extension string) ([]string, error) {
+	matches := []string{}
+	if err := filepath.Walk(path, func(p string, f os.FileInfo, err error) error {
+		if filepath.Ext(path) == "."+extension {
+			matches = append(matches, path)
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	return matches, nil
+}
+
 func main() {
 	configs := createConfigsModelFromEnvs()
 
@@ -484,10 +497,9 @@ func main() {
 		log.Infof("Collecting ios outputs")
 
 		// ipa
-		ipaPattern := filepath.Join(iosOutputDir, "*.ipa")
-		ipas, err := filepath.Glob(ipaPattern)
+		ipas, err := find(iosOutputDir, "ipa")
 		if err != nil {
-			fail("Failed to find ipas, with pattern (%s), error: %s", ipaPattern, err)
+			fail("Failed to find ipas in path (%s), error: %s", iosOutputDir, err)
 		}
 
 		if len(ipas) > 0 {
@@ -500,10 +512,9 @@ func main() {
 		// ---
 
 		// dsym
-		dsymPattern := filepath.Join(iosOutputDir, "*.dSYM")
-		dsyms, err := filepath.Glob(dsymPattern)
+		dsyms, err := find(iosOutputDir, "dSYM")
 		if err != nil {
-			fail("Failed to find dSYMs, with pattern (%s), error: %s", dsymPattern, err)
+			fail("Failed to find dSYMs in path (%s), error: %s", iosOutputDir, err)
 		}
 
 		if len(dsyms) > 0 {
@@ -527,10 +538,9 @@ func main() {
 		// --
 
 		// app
-		appPattern := filepath.Join(iosOutputDir, "*.app")
-		apps, err := filepath.Glob(appPattern)
+		apps, err := find(iosOutputDir, "app")
 		if err != nil {
-			fail("Failed to find apps, with pattern (%s), error: %s", appPattern, err)
+			fail("Failed to find apps in path (%s), error: %s", iosOutputDir, err)
 		}
 
 		if len(apps) > 0 {
@@ -564,13 +574,8 @@ func main() {
 		fmt.Println()
 		log.Infof("Collecting android outputs")
 
-		apks := []string{}
-		if err := filepath.Walk(androidOutputDir, func(path string, f os.FileInfo, err error) error {
-			if filepath.Ext(path) == ".apk" {
-				apks = append(apks, path)
-			}
-			return nil
-		}); err != nil {
+		apks, err := find(androidOutputDir, "apk")
+		if err != nil {
 			fail("Failed to find apks in path (%s), error: %s", androidOutputDir, err)
 		}
 
