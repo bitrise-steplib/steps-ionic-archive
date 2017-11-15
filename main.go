@@ -564,10 +564,14 @@ func main() {
 		fmt.Println()
 		log.Infof("Collecting android outputs")
 
-		pattern := filepath.Join(androidOutputDir, "*.apk")
-		apks, err := filepath.Glob(pattern)
-		if err != nil {
-			fail("Failed to find apks, with pattern (%s), error: %s", pattern, err)
+		apks := []string{}
+		if err := filepath.Walk(androidOutputDir, func(path string, f os.FileInfo, err error) error {
+			if filepath.Ext(path) == ".apk" {
+				apks = append(apks, path)
+			}
+			return nil
+		}); err != nil {
+			fail("Failed to find apks in path (%s), error: %s", androidOutputDir, err)
 		}
 
 		if len(apks) > 0 {
