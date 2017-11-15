@@ -238,15 +238,15 @@ func getField(c ConfigsModel, field string) string {
 	return string(f.String())
 }
 
-func find(path, extension string) ([]string, error) {
+func find(dir, extension string) ([]string, error) {
 	matches := []string{}
-	if err := filepath.Walk(path, func(p string, f os.FileInfo, err error) error {
-		if filepath.Ext(path) == "."+extension {
-			matches = append(matches, path)
+	if walkErr := filepath.Walk(dir, func(pth string, f os.FileInfo, err error) error {
+		if filepath.Ext(pth) == "."+extension {
+			matches = append(matches, pth)
 		}
-		return nil
-	}); err != nil {
-		return nil, err
+		return err
+	}); walkErr != nil {
+		return nil, walkErr
 	}
 	return matches, nil
 }
@@ -499,7 +499,7 @@ func main() {
 		// ipa
 		ipas, err := find(iosOutputDir, "ipa")
 		if err != nil {
-			fail("Failed to find ipas in path (%s), error: %s", iosOutputDir, err)
+			fail("Failed to find ipas in dir (%s), error: %s", iosOutputDir, err)
 		}
 
 		if len(ipas) > 0 {
@@ -514,7 +514,7 @@ func main() {
 		// dsym
 		dsyms, err := find(iosOutputDir, "dSYM")
 		if err != nil {
-			fail("Failed to find dSYMs in path (%s), error: %s", iosOutputDir, err)
+			fail("Failed to find dSYMs in dir (%s), error: %s", iosOutputDir, err)
 		}
 
 		if len(dsyms) > 0 {
@@ -540,7 +540,7 @@ func main() {
 		// app
 		apps, err := find(iosOutputDir, "app")
 		if err != nil {
-			fail("Failed to find apps in path (%s), error: %s", iosOutputDir, err)
+			fail("Failed to find apps in dir (%s), error: %s", iosOutputDir, err)
 		}
 
 		if len(apps) > 0 {
@@ -576,7 +576,7 @@ func main() {
 
 		apks, err := find(androidOutputDir, "apk")
 		if err != nil {
-			fail("Failed to find apks in path (%s), error: %s", androidOutputDir, err)
+			fail("Failed to find apks in dir (%s), error: %s", androidOutputDir, err)
 		}
 
 		if len(apks) > 0 {
