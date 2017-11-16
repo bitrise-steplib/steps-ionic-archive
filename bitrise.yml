@@ -139,7 +139,7 @@ workflows:
 
             export CI=true
 
-            releaseman create-changelog \
+            releaseman create \
               --version $STEP_VERSION 
 
   # ----------------------------------------------------------------
