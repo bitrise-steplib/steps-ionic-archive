@@ -1,6 +1,13 @@
-## Changelog (Current version: 1.2.0)
+## Changelog (Current version: 1.2.1)
 
 -----------------
+
+### 1.2.1 (2017 Nov 16)
+
+* [0a7a5d8] use releaseman create, not just create-changelog
+* [f421343] Bump version to 1.2.1
+* [8cae155] Find apks in subdirs (#22)
+* [1238bd0] Do not install Ionic angular and cordova CLI plugins if version is above 3.8.0 (#21)
 
 ### 1.2.0 (2017 Nov 08)
 
@@ -51,4 +58,4 @@
 
 -----------------
 
-Updated: 2017 Nov 08
+Updated: 2017 Nov 16
