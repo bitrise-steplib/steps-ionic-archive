@@ -35,7 +35,7 @@ const (
 
 // ConfigsModel ...
 type ConfigsModel struct {
-	Remove        bool
+	Remove        string
 	Platform      string
 	Configuration string
 	Target        string
@@ -358,7 +358,7 @@ func main() {
 	fmt.Println()
 	log.Infof("Building project")
 
-	if configs.Remove == true{
+	if configs.Remove == "yes"{
 		// platform rm
 		for _, platform := range platforms {
 			cmdArgs := []string{"ionic"}
