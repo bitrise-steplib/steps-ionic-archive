@@ -35,6 +35,7 @@ const (
 
 // ConfigsModel ...
 type ConfigsModel struct {
+	Remove        bool
 	Platform      string
 	Configuration string
 	Target        string
