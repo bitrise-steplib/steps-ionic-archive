@@ -26,14 +26,14 @@ toolkit:
   go:
     package_name: github.com/bitrise-community/steps-ionic-archive
 inputs:
-  - remove: false
+  - remove: "no"
     opts:
       title: "Remove platforms"
       description: |-
         Enable/disable the removal of platforms
       value_options:
-      - true
-      - false
+      - "yes"
+      - "no"
       is_required: true
   - platform: "ios,android"
     opts:
