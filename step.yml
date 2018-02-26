@@ -26,6 +26,15 @@ toolkit:
   go:
     package_name: github.com/bitrise-community/steps-ionic-archive
 inputs:
+  - remove: "no"
+    opts:
+      title: "Remove platforms"
+      description: |-
+        Enable/disable the removal of platforms
+      value_options:
+      - "yes"
+      - "no"
+      is_required: true
   - platform: "ios,android"
     opts:
       title: "Platform to use in ionic-cli commands"
