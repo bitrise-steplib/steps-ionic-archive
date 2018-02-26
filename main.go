@@ -35,6 +35,7 @@ const (
 
 // ConfigsModel ...
 type ConfigsModel struct {
+	Remove        string
 	Platform      string
 	Configuration string
 	Target        string
@@ -56,6 +57,7 @@ type ConfigsModel struct {
 
 func createConfigsModelFromEnvs() ConfigsModel {
 	return ConfigsModel{
+		Remove:		   os.Getenv("remove"),
 		Platform:      os.Getenv("platform"),
 		Configuration: os.Getenv("configuration"),
 		Target:        os.Getenv("target"),
@@ -356,7 +358,7 @@ func main() {
 	fmt.Println()
 	log.Infof("Building project")
 
-	{
+	if configs.Remove == "yes"{
 		// platform rm
 		for _, platform := range platforms {
 			cmdArgs := []string{"ionic"}
