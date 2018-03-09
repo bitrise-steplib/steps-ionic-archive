@@ -602,7 +602,7 @@ func main() {
 	// if ios in platforms
 	if platforms[sort.SearchStrings(platforms, "ios")] == "ios" {
 		if len(apps) == 0 && configs.Target == "emulator" {
-			fail("no dsym generated")
+			fail("no apps generated")
 		}
 		if len(ipas) == 0 && configs.Target == "device" {
 			fail("no ipas generated")
