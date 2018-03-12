@@ -4,20 +4,30 @@
 [[projects]]
   branch = "master"
   name = "github.com/bitrise-io/go-utils"
-  packages = ["colorstring","command","errorutil","log","pathutil","ziputil"]
-  revision = "961320f9011cedf55e1da0578949bf63450a96c0"
+  packages = [
+    "colorstring",
+    "command",
+    "errorutil",
+    "log",
+    "pathutil",
+    "ziputil"
+  ]
+  revision = "b33f6bcef9b50045d7e62364b354584afc3ee329"
 
 [[projects]]
   branch = "master"
   name = "github.com/bitrise-tools/go-steputils"
-  packages = ["input","tools"]
-  revision = "a848c9870ff7d745a8fb2a951e1c81fcb147b4ec"
+  packages = [
+    "input",
+    "tools"
+  ]
+  revision = "b0e1079aa921440413a5c56f301246fe8367c072"
 
 [[projects]]
   branch = "master"
   name = "github.com/hashicorp/go-version"
   packages = ["."]
-  revision = "fc61389e27c71d120f87031ca8c88a3428f372dd"
+  revision = "4fe82ae3040f80a03d04d2cccb5606a626b8e1ee"
 
 [[projects]]
   branch = "master"
@@ -29,7 +39,7 @@
   branch = "master"
   name = "github.com/pkg/errors"
   packages = ["."]
-  revision = "2b3a18b5f0fb6b4f9190549597d3f962c02bc5eb"
+  revision = "30136e27e2ac8d167177e8a583aa4c3fea5be833"
 
 [solve-meta]
   analyzer-name = "dep"

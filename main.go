@@ -7,7 +7,9 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"sort"
 	"strings"
+	"time"
 
 	"github.com/bitrise-io/go-utils/colorstring"
 	"github.com/bitrise-io/go-utils/command"
@@ -238,11 +240,14 @@ func getField(c ConfigsModel, field string) string {
 	return string(f.String())
 }
 
-func find(dir, extension string) ([]string, error) {
-	matches := []string{}
-	if walkErr := filepath.Walk(dir, func(pth string, f os.FileInfo, err error) error {
-		if filepath.Ext(pth) == "."+extension {
-			matches = append(matches, pth)
+func findArtifact(dir, ext string, buildStart time.Time) ([]string, error) {
+	var matches []string
+	if walkErr := filepath.Walk(dir, func(path string, fi os.FileInfo, err error) error {
+		if fi.ModTime().Before(buildStart) {
+			return nil
+		}
+		if filepath.Ext(path) == "."+ext {
+			matches = append(matches, path)
 		}
 		return err
 	}); walkErr != nil {
@@ -371,13 +376,11 @@ func main() {
 
 	ionicMajorVersion := ionicVer.Segments()[0]
 
-	platforms := []string{}
-	if configs.Platform != "" {
-		platformsSplit := strings.Split(configs.Platform, ",")
-		for _, platform := range platformsSplit {
-			platforms = append(platforms, strings.TrimSpace(platform))
-		}
+	platforms := strings.Split(configs.Platform, ",")
+	for i, p := range platforms {
+		platforms[i] = strings.TrimSpace(p)
 	}
+	sort.Strings(platforms)
 
 	// ionic prepare
 	fmt.Println()
@@ -437,6 +440,7 @@ func main() {
 		}
 	}
 
+	buildStart := time.Now()
 	{
 		// build
 		options := []string{}
@@ -486,18 +490,18 @@ func main() {
 
 	// collect outputs
 
-	iosOutputDirExist := false
+	var ipas, dsyms, apps []string
 	iosOutputDir := filepath.Join(workDir, "platforms", "ios", "build", configs.Target)
 	if exist, err := pathutil.IsDirExists(iosOutputDir); err != nil {
 		fail("Failed to check if dir (%s) exist, error: %s", iosOutputDir, err)
 	} else if exist {
-		iosOutputDirExist = true
+		log.Donef("\n\nIOS output dir exists!\n\n")
 
 		fmt.Println()
 		log.Infof("Collecting ios outputs")
 
 		// ipa
-		ipas, err := find(iosOutputDir, "ipa")
+		ipas, err = findArtifact(iosOutputDir, "ipa", buildStart)
 		if err != nil {
 			fail("Failed to find ipas in dir (%s), error: %s", iosOutputDir, err)
 		}
@@ -512,7 +516,7 @@ func main() {
 		// ---
 
 		// dsym
-		dsyms, err := find(iosOutputDir, "dSYM")
+		dsyms, err = findArtifact(iosOutputDir, "dSYM", buildStart)
 		if err != nil {
 			fail("Failed to find dSYMs in dir (%s), error: %s", iosOutputDir, err)
 		}
@@ -538,7 +542,7 @@ func main() {
 		// --
 
 		// app
-		apps, err := find(iosOutputDir, "app")
+		apps, err = findArtifact(iosOutputDir, "app", buildStart)
 		if err != nil {
 			fail("Failed to find apps in dir (%s), error: %s", iosOutputDir, err)
 		}
@@ -562,19 +566,19 @@ func main() {
 			}
 		}
 		// ---
+	} else {
+		// ios output directory not exists and ios selected as platform
 	}
 
-	androidOutputDirExist := false
-	androidOutputDir := filepath.Join(workDir, "platforms", "android", "build", "outputs", "apk")
+	var apks []string
+	androidOutputDir := filepath.Join(workDir, "platforms", "android")
 	if exist, err := pathutil.IsDirExists(androidOutputDir); err != nil {
 		fail("Failed to check if dir (%s) exist, error: %s", androidOutputDir, err)
 	} else if exist {
-		androidOutputDirExist = true
-
 		fmt.Println()
 		log.Infof("Collecting android outputs")
 
-		apks, err := find(androidOutputDir, "apk")
+		apks, err = findArtifact(androidOutputDir, "apk", buildStart)
 		if err != nil {
 			fail("Failed to find apks in dir (%s), error: %s", androidOutputDir, err)
 		}
@@ -591,8 +595,17 @@ func main() {
 		}
 	}
 
-	if !iosOutputDirExist && !androidOutputDirExist {
-		log.Warnf("No ios nor android platform's output dir exist")
-		fail("No output generated")
+	// if android in platforms
+	if len(apks) == 0 && platforms[sort.SearchStrings(platforms, "android")] == "android" {
+		fail("No apk generated")
+	}
+	// if ios in platforms
+	if platforms[sort.SearchStrings(platforms, "ios")] == "ios" {
+		if len(apps) == 0 && configs.Target == "emulator" {
+			fail("no apps generated")
+		}
+		if len(ipas) == 0 && configs.Target == "device" {
+			fail("no ipas generated")
+		}
 	}
 }
