@@ -1,6 +1,12 @@
-## Changelog (Current version: 1.2.1)
+## Changelog (Current version: 1.2.2)
 
 -----------------
+
+### 1.2.2 (2018 Mar 12)
+
+* [65b3a60] Bump version to 1.2.2
+* [ab83191] Fix: incorrect status (#28)
+* [963e5c3] fix failing ci test (#27)
 
 ### 1.2.1 (2017 Nov 16)
 
@@ -58,4 +64,4 @@
 
 -----------------
 
-Updated: 2017 Nov 16
+Updated: 2018 Mar 12
