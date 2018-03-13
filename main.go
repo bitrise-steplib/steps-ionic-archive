@@ -38,6 +38,7 @@ const (
 
 // ConfigsModel ...
 type ConfigsModel struct {
+	Remove		  string
 	Platform      string
 	Configuration string
 	Target        string
@@ -58,6 +59,7 @@ type ConfigsModel struct {
 
 func createConfigsModelFromEnvs() ConfigsModel {
 	return ConfigsModel{
+		Remove:		   os.Getenv("remove"),
 		Platform:      os.Getenv("platform"),
 		Configuration: os.Getenv("configuration"),
 		Target:        os.Getenv("target"),
@@ -79,6 +81,7 @@ func createConfigsModelFromEnvs() ConfigsModel {
 
 func (configs ConfigsModel) print() {
 	log.Infof("Configs:")
+	log.Printf("- Remove: %s", configs.Remove)
 	log.Printf("- Platform: %s", configs.Platform)
 	log.Printf("- Configuration: %s", configs.Configuration)
 	log.Printf("- Target: %s", configs.Target)
@@ -386,7 +389,7 @@ func main() {
 	fmt.Println()
 	log.Infof("Building project")
 
-	{
+	if configs.Remove == "yes" {
 		// platform rm
 		for _, platform := range platforms {
 			cmdArgs := []string{"ionic"}
