@@ -5,7 +5,7 @@ app:
   envs:
   - STEP_VERSION: 1.2.2
   - SAMPLE_APP_URL: https://github.com/bitrise-samples/ionic-conference-app.git
-  - BRANCH: update
+  - BRANCH: master
 
 workflows:
   test:
