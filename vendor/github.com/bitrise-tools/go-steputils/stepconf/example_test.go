@@ -8,7 +8,7 @@ import (
 	"github.com/bitrise-tools/go-steputils/stepconf"
 )
 
-type Configuration struct {
+type config struct {
 
 	// Env vars specified in the struct tags are converted to the respective basic data types.
 	Name        string `env:"name"`
@@ -52,9 +52,6 @@ var envs = map[string]string{
 }
 
 func Example() {
-	var c Configuration
-	os.Clearenv()
-
 	// Set env vars for the example.
 	for env, value := range envs {
 		err := os.Setenv(env, value)
@@ -63,10 +60,10 @@ func Example() {
 		}
 	}
 
-	if err := stepconf.Parse(&c); err != nil {
+	var cfg config
+	if err := stepconf.Parse(&cfg); err != nil {
 		log.Fatalf("Couldn't create config: %v\n", err)
 	}
-
-	fmt.Println(c)
+	fmt.Println(cfg)
 	// Output: {Example 11 true [item1 item2 item3] *****  present /etc/hosts /tmp dev}
 }

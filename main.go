@@ -15,6 +15,7 @@ import (
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
+	"github.com/bitrise-io/go-utils/sliceutil"
 	"github.com/bitrise-io/go-utils/ziputil"
 	"github.com/bitrise-tools/go-steputils/input"
 	"github.com/bitrise-tools/go-steputils/tools"
@@ -596,11 +597,11 @@ func main() {
 	}
 
 	// if android in platforms
-	if len(apks) == 0 && platforms[sort.SearchStrings(platforms, "android")] == "android" {
+	if len(apks) == 0 && sliceutil.IsStringInSlice("android", platforms) {
 		fail("No apk generated")
 	}
 	// if ios in platforms
-	if platforms[sort.SearchStrings(platforms, "ios")] == "ios" {
+	if sliceutil.IsStringInSlice("ios", platforms) {
 		if len(apps) == 0 && configs.Target == "emulator" {
 			fail("no apps generated")
 		}

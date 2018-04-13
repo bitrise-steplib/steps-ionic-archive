@@ -10,6 +10,7 @@
     "errorutil",
     "log",
     "pathutil",
+    "sliceutil",
     "ziputil"
   ]
   revision = "b33f6bcef9b50045d7e62364b354584afc3ee329"
@@ -21,13 +22,13 @@
     "input",
     "tools"
   ]
-  revision = "b0e1079aa921440413a5c56f301246fe8367c072"
+  revision = "d4d9e08cc4347e8784bb18419fcdceb932e17019"
 
 [[projects]]
   branch = "master"
   name = "github.com/hashicorp/go-version"
   packages = ["."]
-  revision = "4fe82ae3040f80a03d04d2cccb5606a626b8e1ee"
+  revision = "23480c0665776210b5fbbac6eaaee40e3e6a96b7"
 
 [[projects]]
   branch = "master"
@@ -39,11 +40,11 @@
   branch = "master"
   name = "github.com/pkg/errors"
   packages = ["."]
-  revision = "30136e27e2ac8d167177e8a583aa4c3fea5be833"
+  revision = "816c9085562cd7ee03e7f8188a1cfd942858cded"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b5510901712852e59cab22a867153c91306b94451a3b953d1db028b828de4322"
+  inputs-digest = "483b764bbbd72255955b0e1b3026b815a18f7c7f897431efecc86bf302d1bdc0"
   solver-name = "gps-cdcl"
   solver-version = 1
