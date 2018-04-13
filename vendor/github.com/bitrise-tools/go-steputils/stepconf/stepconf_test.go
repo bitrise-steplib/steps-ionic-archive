@@ -229,6 +229,29 @@ func TestValueOptions(t *testing.T) {
 	}
 }
 
+func TestValueOptionsWithComma(t *testing.T) {
+	type config struct {
+		Option string `env:"option,opt[opt1,opt2,'opt1,opt2']"`
+	}
+	var c config
+	os.Clearenv()
+	if err := os.Setenv("option", "opt1,opt2"); err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+	if err := stepconf.Parse(&c); err != nil {
+		t.Errorf("failure when value is in value options: %s", err)
+	}
+	if c.Option != "opt1,opt2" {
+		t.Errorf("expected %s, got %v", "opt1", c.Option)
+	}
+	if err := os.Setenv("option", ""); err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+	if err := stepconf.Parse(&c); err == nil {
+		t.Errorf("no failure when value is not in value options")
+	}
+}
+
 func ExampleParse() {
 	c := struct {
 		Name string `env:"ENV_NAME"`
