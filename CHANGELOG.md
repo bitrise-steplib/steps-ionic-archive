@@ -1,6 +1,11 @@
-## Changelog (Current version: 1.2.2)
+## Changelog (Current version: 1.2.3)
 
 -----------------
+
+### 1.2.3 (2018 Apr 13)
+
+* [d556e13] prepare for 1.2.3
+* [355d1fc] output check fix (#29)
 
 ### 1.2.2 (2018 Mar 12)
 
@@ -64,4 +69,4 @@
 
 -----------------
 
-Updated: 2018 Mar 12
+Updated: 2018 Apr 13
