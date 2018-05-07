@@ -98,7 +98,7 @@ inputs:
       title: "Should remove platforms as prepare step?"
       description: |-
         Specify whether to remove platforms and then re-add (overwrites some config.xml values).
-        `cordova platform rm <platform>`
+        `ionic [cordova] platform rm <platform>`
       value_options:
       - "true"
       - "false"

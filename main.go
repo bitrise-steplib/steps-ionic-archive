@@ -415,8 +415,6 @@ func main() {
 				fail("command failed, error: %s", err)
 			}
 		}
-	} else {
-		log.Warnf("Removing platforms has been turned off. You can change it with the readd_platform input.")
 	}
 
 	{
