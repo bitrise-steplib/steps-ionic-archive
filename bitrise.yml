@@ -60,6 +60,7 @@ workflows:
         - ionic_version: latest
         - ionic_username: $IONIC_USERNAME
         - ionic_password: $IONIC_PASSWORD
+        - readd_platform: true
 
   # ----------------------------------------------------------------
   # --- Utility workflows

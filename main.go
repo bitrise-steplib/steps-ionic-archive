@@ -48,6 +48,7 @@ type ConfigsModel struct {
 	Username string
 	Password string
 
+	ReAddPlatform         string
 	IonicVersion          string
 	CordovaVersion        string
 	CordovaIosVersion     string
@@ -68,6 +69,7 @@ func createConfigsModelFromEnvs() ConfigsModel {
 		Username: os.Getenv("ionic_username"),
 		Password: os.Getenv("ionic_password"),
 
+		ReAddPlatform:         os.Getenv("readd_platform"),
 		IonicVersion:          os.Getenv("ionic_version"),
 		CordovaVersion:        os.Getenv("cordova_version"),
 		CordovaIosVersion:     os.Getenv("cordova_ios_version"),
@@ -89,6 +91,7 @@ func (configs ConfigsModel) print() {
 	log.Printf("- Username: %s", input.SecureInput(configs.Username))
 	log.Printf("- Password: %s", input.SecureInput(configs.Password))
 
+	log.Printf("- ReAddPlatform: %s", configs.ReAddPlatform)
 	log.Printf("- IonicVersion: %s", configs.IonicVersion)
 	log.Printf("- CordovaVersion: %s", configs.CordovaVersion)
 	log.Printf("- CordovaIosVersion: %s", configs.CordovaIosVersion)
@@ -105,6 +108,10 @@ func (configs ConfigsModel) validate() error {
 
 	if err := input.ValidateWithOptions(configs.Platform, "ios,android", "ios", "android"); err != nil {
 		return fmt.Errorf("Platform: %s", err)
+	}
+
+	if err := input.ValidateWithOptions(configs.ReAddPlatform, "true", "false"); err != nil {
+		return fmt.Errorf("ReAddPlatform: %s", err)
 	}
 
 	if err := input.ValidateIfNotEmpty(configs.Configuration); err != nil {
@@ -387,8 +394,8 @@ func main() {
 	fmt.Println()
 	log.Infof("Building project")
 
-	{
-		// platform rm
+	// platform rm
+	if configs.ReAddPlatform == "true" {
 		for _, platform := range platforms {
 			cmdArgs := []string{"ionic"}
 			if ionicMajorVersion > 2 {

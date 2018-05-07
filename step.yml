@@ -93,6 +93,16 @@ inputs:
 
         If value is set to `latest`, the step will update to the latest ionic version.
         Leave this input empty to use the preinstalled ionic version.
+  - readd_platform: "true"
+    opts:
+      title: "Should remove platforms as prepare step?"
+      description: |-
+        Specify whether to remove platforms and then re-add (overwrites some config.xml values).
+        `ionic [cordova] platform rm <platform>`
+      value_options:
+      - "true"
+      - "false"
+      is_required: true
   - cordova_version: 
     opts:
       title: "Cordova version"
