@@ -1,6 +1,11 @@
-## Changelog (Current version: 1.2.3)
+## Changelog (Current version: 1.2.4)
 
 -----------------
+
+### 1.2.4 (2018 May 07)
+
+* [ee39eac] Prepare for 1.2.4
+* [b35af7e] Read platform option just like in the steps-cordova-archive (#30)
 
 ### 1.2.3 (2018 Apr 13)
 
@@ -69,4 +74,4 @@
 
 -----------------
 
-Updated: 2018 Apr 13
+Updated: 2018 May 07
