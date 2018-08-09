@@ -80,11 +80,13 @@ inputs:
       title: "Ionic username"
       description: |-
         Use `Ionic username` and `Ionic password` to login with ioni-cli.
+      is_sensitive: true
   - ionic_password:
     opts:
       title: "Ionic password"
       description: |-
         Use `Ionic username` and `Ionic password` to login with ioni-cli.
+      is_sensitive: true
   - ionic_version: 
     opts:
       title: "Ionic version"
