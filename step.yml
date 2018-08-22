@@ -3,12 +3,12 @@ summary: Archives your Ionic project
 description: |-
   Archives your Ionic project.
 
-  For first the step prepare your Ionic project by calling:
+  First, the step prepares your Ionic project by calling:
 
   - `ionic cordova "platform" "rm" "<platform>"`
   - `ionic cordova "platform" "add" "<platform>"`
 
-  then it archives the project by calling:
+  After, it archives the project by calling:
 
   - `ionic cordova "build" "--debug|--release" "--device|--emulator" "<platform>" "--buildConfig=$BITRISE_CORDOVA_BUILD_CONFIGURATION"`
 website: https://github.com/bitrise-community/steps-ionic-archive
@@ -79,13 +79,13 @@ inputs:
     opts:
       title: "Ionic username"
       description: |-
-        Use `Ionic username` and `Ionic password` to login with ioni-cli.
+        Use `Ionic username` and `Ionic password` to login with ionic-cli.
       is_sensitive: true
   - ionic_password:
     opts:
       title: "Ionic password"
       description: |-
-        Use `Ionic username` and `Ionic password` to login with ioni-cli.
+        Use `Ionic username` and `Ionic password` to login with ionic-cli.
       is_sensitive: true
   - ionic_version: 
     opts:
