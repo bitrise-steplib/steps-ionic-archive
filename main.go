@@ -230,11 +230,11 @@ func cordovaVersion() (*ver.Version, error) {
 	if err != nil {
 		return nil, err
 	}
-	version, err := ver.NewVersion(out)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse version: %s", out)
+	lines := strings.Split(out, "\n")
+	if len(lines) > 0 {
+		return lines[len(lines)-1], nil
 	}
-	return version, nil
+	return out, nil
 }
 
 func fail(format string, v ...interface{}) {
