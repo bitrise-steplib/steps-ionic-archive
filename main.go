@@ -230,7 +230,7 @@ func cordovaVersion() (*ver.Version, error) {
 	if err != nil {
 		return nil, err
 	}
-	out = strings.Split(out, "(")
+	out = strings.Split(out, "(")[0]
 	out = strings.TrimSpace(out)
 	
 	version, err := ver.NewVersion(out)
