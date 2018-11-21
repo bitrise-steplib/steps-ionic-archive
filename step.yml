@@ -65,11 +65,13 @@ inputs:
       title: "Build configuration path, to describe code signing properties"
       description: |-
         Path to the build configuration file (build.json), which describes code signing properties.
-  - options:
+  - options: -- --buildFlag="-UseModernBuildSystem=0"
     opts:
       title: "Options to append to the ionic-cli build command"
       description: |-
         Use this input to specify custom options, to append to the end of the ionic-cli build command.
+
+        For Xcode 10 build issues add `-- --buildFlag="-UseModernBuildSystem=0"` to the options string.
 
         Example:
         - `--browserify`

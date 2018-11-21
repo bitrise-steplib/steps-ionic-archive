@@ -232,7 +232,7 @@ func cordovaVersion() (*ver.Version, error) {
 	}
 	out = strings.Split(out, "(")[0]
 	out = strings.TrimSpace(out)
-	
+
 	version, err := ver.NewVersion(out)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse version: %s", out)
@@ -306,15 +306,16 @@ func main() {
 	}
 
 	// Update cordova and ionic version
+	packageManager := detectJsPackageManager(workDir)
 	if configs.CordovaVersion != "" {
 		fmt.Println()
 		log.Infof("Updating cordova version to: %s", configs.CordovaVersion)
 
-		if err := npmRemove(false, "cordova"); err != nil {
+		if err := removeJsPackages(packageManager, false, "cordova"); err != nil {
 			fail("Failed to remove cordova, error: %s", err)
 		}
 
-		if err := npmInstall(true, "cordova@"+configs.CordovaVersion); err != nil {
+		if err := addJsPackages(packageManager, true, "cordova@"+configs.CordovaVersion); err != nil {
 			fail("Failed to install cordova, error: %s", err)
 		}
 	}
@@ -323,17 +324,17 @@ func main() {
 		fmt.Println()
 		log.Infof("Updating ionic version to: %s", configs.IonicVersion)
 
-		if err := npmRemove(false, "ionic"); err != nil {
+		if err := removeJsPackages(packageManager, false, "ionic"); err != nil {
 			fail("Failed to remove ionic, error: %s", err)
 		}
 
-		if err := npmInstall(true, "ionic@"+configs.IonicVersion); err != nil {
+		if err := addJsPackages(packageManager, true, "ionic@"+configs.IonicVersion); err != nil {
 			fail("Failed to install ionic, error: %s", err)
 		}
 
 		fmt.Println()
 		log.Infof("Installing local ionic cli")
-		if err := npmInstall(false, "ionic@"+configs.IonicVersion); err != nil {
+		if err := addJsPackages(packageManager, false, "ionic@"+configs.IonicVersion); err != nil {
 			fail("command failed, error: %s", err)
 		}
 	}
@@ -363,7 +364,7 @@ func main() {
 	if ionicVerConstraint.Check(ionicVer) {
 		fmt.Println()
 		log.Infof("Installing cordova and angular plugins")
-		if err := npmInstall(false, "@ionic/cli-plugin-ionic-angular@latest", "@ionic/cli-plugin-cordova@latest"); err != nil {
+		if err := addJsPackages(packageManager, false, "@ionic/cli-plugin-ionic-angular@latest", "@ionic/cli-plugin-cordova@latest"); err != nil {
 			fail("command failed, error: %s", err)
 		}
 	}
@@ -503,6 +504,7 @@ func main() {
 
 	var ipas, dsyms, apps []string
 	iosOutputDir := filepath.Join(workDir, "platforms", "ios", "build", configs.Target)
+	log.Debugf("iOS output directory: %s", iosOutputDir)
 	if exist, err := pathutil.IsDirExists(iosOutputDir); err != nil {
 		fail("Failed to check if dir (%s) exist, error: %s", iosOutputDir, err)
 	} else if exist {
@@ -583,6 +585,7 @@ func main() {
 
 	var apks []string
 	androidOutputDir := filepath.Join(workDir, "platforms", "android")
+	log.Debugf("Android output directory: %s", androidOutputDir)
 	if exist, err := pathutil.IsDirExists(androidOutputDir); err != nil {
 		fail("Failed to check if dir (%s) exist, error: %s", androidOutputDir, err)
 	} else if exist {
