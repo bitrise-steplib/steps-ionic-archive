@@ -15,10 +15,10 @@ workflows:
     - errcheck:
     - go-test:
     after_run:
-    - test_with_npm
-    - test_with_yarn
+    - test-with-npm
+    - test-with-yarn
 
-  test_with_npm:
+  test-with-npm:
     envs:
     - SAMPLE_APP_URL: https://github.com/bitrise-samples/ionic-conference-app.git
     - BRANCH: update
@@ -27,7 +27,7 @@ workflows:
     after_run:
     - _common
 
-  test_with_yarn:
+  test-with-yarn:
     envs:
     - SAMPLE_APP_URL: https://github.com/bitrise-samples/ionic-conference-app.git
     - BRANCH: yarn-test-preadded-platforms
@@ -37,8 +37,6 @@ workflows:
     - _common
 
   _common:
-    # envs:
-    #   - READD_PLATFORM: ${READD_PLATFORM}
     steps:
     - script:
         inputs:
@@ -70,7 +68,9 @@ workflows:
             [[ -n "${COMMIT}" ]] && git checkout "${COMMIT}" || git checkout "${BRANCH}"
     - script:
         inputs:
-        - content: rm -rf node_modules; rm package-lock.json || true
+        - content: |-
+            #!/usr/bin/env bash
+            rm -rf node_modules; rm package-lock.json || true
     - npm:
         run_if: '{{enveq "USE_NPM" "true"}}'
         inputs:

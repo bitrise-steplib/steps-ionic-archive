@@ -311,7 +311,8 @@ func main() {
 		fmt.Println()
 		log.Infof("Updating cordova version to: %s", configs.CordovaVersion)
 
-		if err := removeJsPackages(packageManager, false, "cordova"); err != nil {
+		// Yarn returns an error if the package is not added before removal, ignoring
+		if err := removeJsPackages(packageManager, false, "cordova"); err != nil && packageManager != Yarn {
 			fail("Failed to remove cordova, error: %s", err)
 		}
 
@@ -323,10 +324,6 @@ func main() {
 	if configs.IonicVersion != "" {
 		fmt.Println()
 		log.Infof("Updating ionic version to: %s", configs.IonicVersion)
-
-		if err := removeJsPackages(packageManager, false, "ionic"); err != nil {
-			fail("Failed to remove ionic, error: %s", err)
-		}
 
 		if err := addJsPackages(packageManager, true, "ionic@"+configs.IonicVersion); err != nil {
 			fail("Failed to install ionic, error: %s", err)

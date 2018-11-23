@@ -56,14 +56,11 @@ func removeJsPackages(packageManager JsPackageManager, isGlobal bool, pkg ...str
 	log.Donef("$ %s", cmd.PrintableCommandArgs())
 	fmt.Println()
 
-	if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil && packageManager != Yarn {
+	if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil { // && packageManager != Yarn {
 		if errorutil.IsExitStatusError(err) {
-			return fmt.Errorf("%s failed, output: %s",
-				cmd.PrintableCommandArgs(), out)
+			return fmt.Errorf("%s failed, output: %s", cmd.PrintableCommandArgs(), out)
 		}
-		return fmt.Errorf("%s failed, error: %s",
-			cmd.PrintableCommandArgs(), err)
-
+		return fmt.Errorf("%s failed, error: %s", cmd.PrintableCommandArgs(), err)
 	}
 	return nil
 }
@@ -92,7 +89,10 @@ func addJsPackages(packageManager JsPackageManager, isGlobal bool, pkg ...string
 	fmt.Println()
 
 	if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
-		return fmt.Errorf("command failed, output: %s, error: %s", out, err)
+		if errorutil.IsExitStatusError(err) {
+			return fmt.Errorf("%s failed, output: %s", cmd.PrintableCommandArgs(), out)
+		}
+		return fmt.Errorf("%s failed, error: %s", cmd.PrintableCommandArgs(), err)
 	}
 	return nil
 }
