@@ -14,6 +14,9 @@ workflows:
     - golint:
     - errcheck:
     - go-test:
+    - nvm@1.2.2:
+        inputs:
+        - node_version: 10.13.0
     after_run:
     - test-with-npm
     - test-with-yarn
