@@ -20,6 +20,7 @@ workflows:
         - node_version: 10.13.0
     after_run:
     - test-with-npm
+    - test-with-npm-no-platform-add
     - test-with-yarn
 
   test-with-npm:
@@ -27,6 +28,15 @@ workflows:
     - SAMPLE_APP_URL: https://github.com/bitrise-samples/ionic-conference-app.git
     - BRANCH: update
     - READD_PLATFORM: true
+    - USE_NPM: true
+    after_run:
+    - _common
+
+  test-with-npm-no-platform-add:
+    envs:
+    - SAMPLE_APP_URL: https://github.com/bitrise-samples/ionic-conference-app.git
+    - BRANCH: update
+    - READD_PLATFORM: false
     - USE_NPM: true
     after_run:
     - _common
@@ -75,6 +85,7 @@ workflows:
         - content: |-
             #!/usr/bin/env bash
             rm -rf node_modules; rm package-lock.json || true
+            rm -rf platforms
     - npm:
         # run_if: '{{enveq "USE_NPM" "true"}}'
         inputs:
@@ -99,6 +110,7 @@ workflows:
         - ionic_username: $IONIC_USERNAME
         - ionic_password: $IONIC_PASSWORD
         - options: --verbose -- --buildFlag="-UseModernBuildSystem=0"
+        - add_platform: ${READD_PLATFORM}
         - readd_platform: ${READD_PLATFORM}
     - change-workdir:
         title: Switch back to original working directory

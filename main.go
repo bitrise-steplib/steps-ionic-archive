@@ -18,7 +18,7 @@ import (
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/sliceutil"
 	"github.com/bitrise-io/go-utils/ziputil"
-	"github.com/bitrise-tools/go-steputils/input"
+	"github.com/bitrise-tools/go-steputils/stepconf"
 	"github.com/bitrise-tools/go-steputils/tools"
 	ver "github.com/hashicorp/go-version"
 	shellquote "github.com/kballard/go-shellquote"
@@ -38,92 +38,25 @@ const (
 	apkPathListEnvKey = "BITRISE_APK_PATH_LIST"
 )
 
-// ConfigsModel ...
-type ConfigsModel struct {
-	Platform      string
-	Configuration string
-	Target        string
-	BuildConfig   string
-	Options       string
+type config struct {
+	Platform      string `env:"platform,opt['ios,android',ios,android]"`
+	Configuration string `env:"configuration,required"`
+	Target        string `env:"target,required"`
+	BuildConfig   string `env:"build_config"`
+	Options       string `env:"options"`
 
-	Username string
-	Password string
+	Username string `env:"ionic_username"`
+	Password string `env:"ionic_password"`
 
-	ReAddPlatform         string
-	IonicVersion          string
-	CordovaVersion        string
-	CordovaIosVersion     string
-	CordovaAndroidVersion string
+	AddPlatform           string `env:"add_platform,opt[true,false]"`
+	ReAddPlatform         string `env:"readd_platform,opt[true,false]"`
+	IonicVersion          string `env:"ionic_version"`
+	CordovaVersion        string `env:"cordova_version"`
+	CordovaIosVersion     string `env:"cordova_ios_version"`
+	CordovaAndroidVersion string `env:"cordova_android_version"`
 
-	WorkDir   string
-	DeployDir string
-}
-
-func createConfigsModelFromEnvs() ConfigsModel {
-	return ConfigsModel{
-		Platform:      os.Getenv("platform"),
-		Configuration: os.Getenv("configuration"),
-		Target:        os.Getenv("target"),
-		BuildConfig:   os.Getenv("build_config"),
-		Options:       os.Getenv("options"),
-
-		Username: os.Getenv("ionic_username"),
-		Password: os.Getenv("ionic_password"),
-
-		ReAddPlatform:         os.Getenv("readd_platform"),
-		IonicVersion:          os.Getenv("ionic_version"),
-		CordovaVersion:        os.Getenv("cordova_version"),
-		CordovaIosVersion:     os.Getenv("cordova_ios_version"),
-		CordovaAndroidVersion: os.Getenv("cordova_android_version"),
-
-		WorkDir:   os.Getenv("workdir"),
-		DeployDir: os.Getenv("BITRISE_DEPLOY_DIR"),
-	}
-}
-
-func (configs ConfigsModel) print() {
-	log.Infof("Configs:")
-	log.Printf("- Platform: %s", configs.Platform)
-	log.Printf("- Configuration: %s", configs.Configuration)
-	log.Printf("- Target: %s", configs.Target)
-	log.Printf("- BuildConfig: %s", configs.BuildConfig)
-	log.Printf("- Options: %s", configs.Options)
-
-	log.Printf("- Username: %s", input.SecureInput(configs.Username))
-	log.Printf("- Password: %s", input.SecureInput(configs.Password))
-
-	log.Printf("- ReAddPlatform: %s", configs.ReAddPlatform)
-	log.Printf("- IonicVersion: %s", configs.IonicVersion)
-	log.Printf("- CordovaVersion: %s", configs.CordovaVersion)
-	log.Printf("- CordovaIosVersion: %s", configs.CordovaIosVersion)
-	log.Printf("- CordovaAndroidVersion: %s", configs.CordovaAndroidVersion)
-
-	log.Printf("- WorkDir: %s", configs.WorkDir)
-	log.Printf("- DeployDir: %s", configs.DeployDir)
-}
-
-func (configs ConfigsModel) validate() error {
-	if err := input.ValidateIfDirExists(configs.WorkDir); err != nil {
-		return fmt.Errorf("WorkDir: %s", err)
-	}
-
-	if err := input.ValidateWithOptions(configs.Platform, "ios,android", "ios", "android"); err != nil {
-		return fmt.Errorf("Platform: %s", err)
-	}
-
-	if err := input.ValidateWithOptions(configs.ReAddPlatform, "true", "false"); err != nil {
-		return fmt.Errorf("ReAddPlatform: %s", err)
-	}
-
-	if err := input.ValidateIfNotEmpty(configs.Configuration); err != nil {
-		return fmt.Errorf("Configuration: %s", err)
-	}
-
-	if err := input.ValidateIfNotEmpty(configs.Target); err != nil {
-		return fmt.Errorf("Target: %s", err)
-	}
-
-	return nil
+	WorkDir   string `env:"workdir,dir"`
+	DeployDir string `env:"BITRISE_DEPLOY_DIR"`
 }
 
 func moveAndExportOutputs(outputs []string, deployDir, envKey string, envListKey string) (string, []string, error) {
@@ -246,7 +179,7 @@ func fail(format string, v ...interface{}) {
 	os.Exit(1)
 }
 
-func getField(c ConfigsModel, field string) string {
+func getField(c config, field string) string {
 	r := reflect.ValueOf(c)
 	f := reflect.Indirect(r).FieldByName(field)
 	return string(f.String())
@@ -269,14 +202,12 @@ func findArtifact(dir, ext string, buildStart time.Time) ([]string, error) {
 }
 
 func main() {
-	configs := createConfigsModelFromEnvs()
-
-	fmt.Println()
-	configs.print()
-
-	if err := configs.validate(); err != nil {
-		fail("Issue with input: %s", err)
+	var configs config
+	if err := stepconf.Parse(&configs); err != nil {
+		fail("Could not create config: %s", err)
 	}
+	fmt.Println()
+	stepconf.Print(configs)
 
 	// Change dir to working directory
 	workDir, err := pathutil.AbsPath(configs.WorkDir)
@@ -396,7 +327,7 @@ func main() {
 	log.Infof("Building project")
 
 	// platform rm
-	if configs.ReAddPlatform == "true" {
+	if configs.AddPlatform == "true" && configs.ReAddPlatform == "true" {
 		for _, platform := range platforms {
 			cmdArgs := []string{"ionic"}
 			if ionicMajorVersion > 2 {
@@ -418,7 +349,7 @@ func main() {
 		}
 	}
 
-	{
+	if configs.AddPlatform == "true" {
 		// platform add
 		for _, platform := range platforms {
 			cmdArgs := []string{"ionic"}
@@ -446,6 +377,20 @@ func main() {
 			if err := cmd.Run(); err != nil {
 				fail("command failed, error: %s", err)
 			}
+		}
+	} else {
+		cmdArgs := []string{"ionic"}
+		if ionicMajorVersion > 2 {
+			cmdArgs = append(cmdArgs, "cordova")
+		}
+
+		cmdArgs = append(cmdArgs, "prepare", "--no-build")
+		cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
+		cmd.SetStdout(os.Stdout).SetStderr(os.Stderr) //.SetStdin(strings.NewReader("y"))
+		log.Donef("$ %s", cmd.PrintableCommandArgs())
+
+		if err := cmd.Run(); err != nil {
+			fail("command %s failed, error: %s", cmd.PrintableCommandArgs(), err)
 		}
 	}
 
