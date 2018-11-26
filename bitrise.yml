@@ -4,6 +4,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 app:
   envs:
   - STEP_VERSION: 1.2.4
+  - ORIG_BITRISE_SOURCE_DIR: $BITRISE_SOURCE_DIR
 
 workflows:
   test:
@@ -96,9 +97,9 @@ workflows:
         - options: --verbose -- --buildFlag="-UseModernBuildSystem=0"
         - readd_platform: ${READD_PLATFORM}
     - change-workdir:
-        title: Switch back working dir
+        title: Switch back to original working directory
         inputs:
-        - path: ..
+        - path: ${ORIG_BITRISE_SOURCE_DIR}
 
   # ----------------------------------------------------------------
   # --- Utility workflows

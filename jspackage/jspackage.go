@@ -1,4 +1,4 @@
-package main
+package jspackage
 
 import (
 	"fmt"
@@ -10,30 +10,28 @@ import (
 	"github.com/bitrise-io/go-utils/pathutil"
 )
 
-// JsPackageManager describes wether npm or yarn is used
-type JsPackageManager int
+// Manager identifies a package manager tool
+type Manager string
 
-// JsPackageManager types
+// Package manager types
 const (
-	Npm  JsPackageManager = 0
-	Yarn JsPackageManager = 1
+	Npm  Manager = "npm"
+	Yarn Manager = "yarn"
 )
 
-func detectJsPackageManager(absPackageJSONDir string) JsPackageManager {
+// DetectManager returns the Js package manager used, e.g. npm or yarn
+func DetectManager(absPackageJSONDir string) Manager {
 	if exist, err := pathutil.IsPathExists(filepath.Join(absPackageJSONDir, "yarn.lock")); err != nil {
 		log.Warnf("Failed to check if yarn.lock file exists in the workdir: %s", err)
-		log.TPrintf("Package manager: npm")
 		return Npm
 	} else if exist {
-		log.TPrintf("Package manager: yarn")
 		return Yarn
-	} else {
-		log.TPrintf("Package manager: npm")
-		return Npm
 	}
+	return Npm
 }
 
-func removeJsPackages(packageManager JsPackageManager, isGlobal bool, pkg ...string) error {
+// Remove removes installed js dependencies using the selected package manager
+func Remove(packageManager Manager, isGlobal bool, pkg ...string) error {
 	var cmd *command.Model
 	switch packageManager {
 	case Npm:
@@ -56,7 +54,7 @@ func removeJsPackages(packageManager JsPackageManager, isGlobal bool, pkg ...str
 	log.Donef("$ %s", cmd.PrintableCommandArgs())
 	fmt.Println()
 
-	if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil { // && packageManager != Yarn {
+	if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
 		if errorutil.IsExitStatusError(err) {
 			return fmt.Errorf("%s failed, output: %s", cmd.PrintableCommandArgs(), out)
 		}
@@ -65,7 +63,8 @@ func removeJsPackages(packageManager JsPackageManager, isGlobal bool, pkg ...str
 	return nil
 }
 
-func addJsPackages(packageManager JsPackageManager, isGlobal bool, pkg ...string) error {
+// Add installs js dependencies using the selected package manager
+func Add(packageManager Manager, isGlobal bool, pkg ...string) error {
 	var cmd *command.Model
 	switch packageManager {
 	case Npm:

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bitrise-community/steps-ionic-archive/jspackage"
 	"github.com/bitrise-io/go-utils/colorstring"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
@@ -306,17 +307,18 @@ func main() {
 	}
 
 	// Update cordova and ionic version
-	packageManager := detectJsPackageManager(workDir)
+	packageManager := jspackage.DetectManager(workDir)
+	log.TPrintf("Js package manager used: %s", packageManager)
 	if configs.CordovaVersion != "" {
 		fmt.Println()
 		log.Infof("Updating cordova version to: %s", configs.CordovaVersion)
 
 		// Yarn returns an error if the package is not added before removal, ignoring
-		if err := removeJsPackages(packageManager, false, "cordova"); err != nil && packageManager != Yarn {
+		if err := jspackage.Remove(packageManager, false, "cordova"); err != nil && packageManager != jspackage.Yarn {
 			fail("Failed to remove cordova, error: %s", err)
 		}
 
-		if err := addJsPackages(packageManager, true, "cordova@"+configs.CordovaVersion); err != nil {
+		if err := jspackage.Add(packageManager, true, "cordova@"+configs.CordovaVersion); err != nil {
 			fail("Failed to install cordova, error: %s", err)
 		}
 	}
@@ -325,13 +327,13 @@ func main() {
 		fmt.Println()
 		log.Infof("Updating ionic version to: %s", configs.IonicVersion)
 
-		if err := addJsPackages(packageManager, true, "ionic@"+configs.IonicVersion); err != nil {
+		if err := jspackage.Add(packageManager, true, "ionic@"+configs.IonicVersion); err != nil {
 			fail("Failed to install ionic, error: %s", err)
 		}
 
 		fmt.Println()
 		log.Infof("Installing local ionic cli")
-		if err := addJsPackages(packageManager, false, "ionic@"+configs.IonicVersion); err != nil {
+		if err := jspackage.Add(packageManager, false, "ionic@"+configs.IonicVersion); err != nil {
 			fail("command failed, error: %s", err)
 		}
 	}
@@ -361,7 +363,7 @@ func main() {
 	if ionicVerConstraint.Check(ionicVer) {
 		fmt.Println()
 		log.Infof("Installing cordova and angular plugins")
-		if err := addJsPackages(packageManager, false, "@ionic/cli-plugin-ionic-angular@latest", "@ionic/cli-plugin-cordova@latest"); err != nil {
+		if err := jspackage.Add(packageManager, false, "@ionic/cli-plugin-ionic-angular@latest", "@ionic/cli-plugin-cordova@latest"); err != nil {
 			fail("command failed, error: %s", err)
 		}
 	}
