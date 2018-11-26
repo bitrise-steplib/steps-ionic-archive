@@ -97,6 +97,14 @@ inputs:
 
         If value is set to `latest`, the step will update to the latest ionic version.
         Leave this input empty to use the preinstalled ionic version.
+  - add_platform: "true"
+    opts:
+      title: "Should add platforms as part of the prepare step?"
+      description: |-
+        Specify whether to add platforms during prepare. If false, only the build command will be called. 
+
+        `ionic [cordova] platform add <platform>`
+      
   - readd_platform: "true"
     opts:
       title: "Should remove platforms as prepare step?"
