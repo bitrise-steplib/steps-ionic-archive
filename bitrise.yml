@@ -76,7 +76,7 @@ workflows:
             #!/usr/bin/env bash
             rm -rf node_modules; rm package-lock.json || true
     - npm:
-        # run_if: '{{enveq "USE_NPM" "true"}}'
+        run_if: '{{enveq "USE_NPM" "true"}}'
         inputs:
         - workdir: ./
         - command: install
