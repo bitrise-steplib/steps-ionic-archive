@@ -80,10 +80,6 @@ workflows:
         inputs:
         - workdir: ./
         - command: install
-    - script:
-        run_if: '{{enveq "USE_NPM" "false"}}'
-        inputs:
-        - content: rm -rf node_modules; rm package-lock.json
     - yarn:
         run_if: '{{enveq "USE_NPM" "false"}}'
         inputs:
