@@ -81,6 +81,11 @@ workflows:
             git fetch || exit 1
             [[ -n "${COMMIT}" ]] && git checkout "${COMMIT}" || git checkout "${BRANCH}"
     - script:
+        # Needed to test ionic cordova prepare
+        run_if: '{{enveq "READD_PLATFORM" "false"}}'
+        inputs:
+        - content: rm -rf ./platforms
+    - script:
         inputs:
         - content: |-
             #!/usr/bin/env bash
