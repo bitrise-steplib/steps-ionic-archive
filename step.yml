@@ -98,6 +98,14 @@ inputs:
 
         If value is set to `latest`, the step will update to the latest ionic version.
         Leave this input empty to use the preinstalled ionic version.
+  - run_ionic_prepare: "true"
+    opts:
+      title: "Should prepare be executed before build?"
+      description: |-
+        It should be set to false if ionic-prepare step is used.
+
+        - false: `ionic cordova build`
+        - true: `ionic cordova prepare --no-build` followed by `ionic cordova build`
   - add_platform: "true"
     opts:
       title: "Should add platforms as part of the prepare step?"
@@ -105,7 +113,7 @@ inputs:
         Specify whether to add platforms during prepare. If false, only the build command will be called. 
 
         `ionic [cordova] platform add <platform>`
-      
+    
   - readd_platform: "true"
     opts:
       title: "Should remove platforms as prepare step?"

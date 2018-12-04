@@ -1,6 +1,7 @@
 package jsdependency
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -60,6 +61,22 @@ func Add(packageManager Tool, commandScope CommandScope, pkg ...string) error {
 		toolCommandBuilder(packageManager, addCommand),
 		commandScope,
 		pkg...)
+}
+
+// InstallGlobalDependency installs a global js dependency, removing if installed locally
+func InstallGlobalDependency(packageManager Tool, dependency string, version string) error {
+	if dependency == "" {
+		return errors.New("Dependency name unspecified")
+	}
+
+	// Yarn returns an error if the package is not added before removal, ignoring
+	if err := Remove(packageManager, Local, dependency); err != nil && packageManager != Yarn {
+		return fmt.Errorf("Failed to remove local %s, error: %s", dependency, err)
+	}
+	if err := Add(packageManager, Global, dependency+"@"+version); err != nil {
+		return fmt.Errorf("Failed to install global %s, error: %s", dependency, err)
+	}
+	return nil
 }
 
 func toolCommandBuilder(packageManger Tool, command managerCommand) string {
