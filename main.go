@@ -58,7 +58,7 @@ type config struct {
 func installDependency(packageManager jsdependency.Tool, name string, version string) error {
 	fmt.Println()
 	log.Infof("Updating %s version to: %s", name, version)
-	cmdSlice, err := jsdependency.InstallGlobalDependency(packageManager, name, version)
+	cmdSlice, err := jsdependency.InstallGlobalDependencyCommand(packageManager, name, version)
 	if err != nil {
 		return fmt.Errorf("Failed to update %s version, error: %s", name, err)
 	}
@@ -211,7 +211,10 @@ func main() {
 	}
 
 	// Update cordova and ionic version
-	packageManager := jsdependency.DetectTool(workDir)
+	packageManager, err := jsdependency.DetectTool(workDir)
+	if err != nil {
+		log.Warnf("%s", err)
+	}
 	log.Printf("Js package manager used: %s", packageManager)
 	if configs.CordovaVersion != "" {
 		if err := installDependency(packageManager, "cordova", configs.CordovaVersion); err != nil {
@@ -249,7 +252,7 @@ func main() {
 	if ionicVerConstraint.Check(ionicVer) {
 		fmt.Println()
 		log.Infof("Installing cordova and angular plugins")
-		cmd, err := jsdependency.Add(packageManager, jsdependency.Local, "@ionic/cli-plugin-ionic-angular@latest", "@ionic/cli-plugin-cordova@latest")
+		cmd, err := jsdependency.AddCommand(packageManager, jsdependency.Local, "@ionic/cli-plugin-ionic-angular@latest", "@ionic/cli-plugin-cordova@latest")
 		if err != nil {
 			fail("%s", err)
 		}

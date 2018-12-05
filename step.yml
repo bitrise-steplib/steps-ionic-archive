@@ -100,7 +100,7 @@ inputs:
         Leave this input empty to use the preinstalled ionic version.
   - run_ionic_prepare: "true"
     opts:
-      title: "Should prepare be executed before build?"
+      title: "Should `ionic cordova prepare` be executed before `ionic cordova build`?"
       description: |-
         It should be set to false if ionic-prepare step is used.
 

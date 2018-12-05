@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/bitrise-io/go-utils/command"
-	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 )
 
@@ -36,47 +35,46 @@ const (
 )
 
 // DetectTool returns the Js package manager used, e.g. npm or yarn
-func DetectTool(absPackageJSONDir string) Tool {
+func DetectTool(absPackageJSONDir string) (Tool, error) {
 	if exist, err := pathutil.IsPathExists(filepath.Join(absPackageJSONDir, "yarn.lock")); err != nil {
-		log.Warnf("Failed to check if yarn.lock file exists in the workdir: %s", err)
-		return Npm
+		return Npm, fmt.Errorf("Failed to check if yarn.lock file exists in the workdir: %s", err)
 	} else if exist {
-		return Yarn
+		return Yarn, nil
 	}
-	return Npm
+	return Npm, nil
 }
 
-// Remove removes installed js dependencies using the selected package manager
-func Remove(packageManager Tool, commandScope CommandScope, pkg ...string) (*command.Model, error) {
-	return runManagerCmd(packageManager,
+// RemoveCommand returns command model to remove js dependencies
+func RemoveCommand(packageManager Tool, commandScope CommandScope, pkg ...string) (*command.Model, error) {
+	return createManagerCmd(packageManager,
 		toolCommandBuilder(packageManager, removeCommand),
 		commandScope,
 		pkg...)
 }
 
-// Add installs js dependencies using the selected package manager
-func Add(packageManager Tool, commandScope CommandScope, pkg ...string) (*command.Model, error) {
-	return runManagerCmd(packageManager,
+// AddCommand returns command model to install js dependencies
+func AddCommand(packageManager Tool, commandScope CommandScope, pkg ...string) (*command.Model, error) {
+	return createManagerCmd(packageManager,
 		toolCommandBuilder(packageManager, addCommand),
 		commandScope,
 		pkg...)
 }
 
-// InstallGlobalDependency installs a global js dependency, removing if installed locally
-func InstallGlobalDependency(packageManager Tool, dependency string, version string) ([]*command.Model, error) {
+// InstallGlobalDependencyCommand returns command model to install a global js dependency
+func InstallGlobalDependencyCommand(packageManager Tool, dependency string, version string) ([]*command.Model, error) {
 	if dependency == "" {
 		return nil, errors.New("Dependency name unspecified")
 	}
 	var cmdSlice []*command.Model
 	{
-		cmd, err := Remove(packageManager, Local, dependency)
+		cmd, err := RemoveCommand(packageManager, Local, dependency)
 		if err != nil {
 			return nil, err
 		}
 		cmdSlice = append(cmdSlice, cmd)
 	}
 	{
-		cmd, err := Add(packageManager, Global, dependency+"@"+version)
+		cmd, err := AddCommand(packageManager, Global, dependency+"@"+version)
 		if err != nil {
 			return nil, err
 		}
@@ -96,7 +94,7 @@ func toolCommandBuilder(packageManger Tool, command managerCommand) string {
 	return "add"
 }
 
-func runManagerCmd(packageManager Tool, packageManagerCmd string, commandScope CommandScope, pkg ...string) (*command.Model, error) {
+func createManagerCmd(packageManager Tool, packageManagerCmd string, commandScope CommandScope, pkg ...string) (*command.Model, error) {
 	var commandArgs []string
 	switch packageManager {
 	case Npm:
