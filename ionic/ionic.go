@@ -3,25 +3,13 @@ package ionic
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 
 	"github.com/bitrise-io/go-utils/command"
-	"github.com/bitrise-io/go-utils/log"
 	ver "github.com/hashicorp/go-version"
 	"github.com/pkg/errors"
 )
-
-// LogIntf declares used logger functions
-type LogIntf interface {
-	// Printf(format string, v ...interface{})
-	Infof(format string, v ...interface{})
-	Donef(format string, v ...interface{})
-}
-
-// Log is the currently set logger
-var Log LogIntf = log.NewDummyLogger()
 
 // Version returns ionic version
 func Version() (*ver.Version, error) {
@@ -72,39 +60,18 @@ func CordovaVersion() (*ver.Version, error) {
 	return version, nil
 }
 
-// LoginCommand runs ionic login comand
-func LoginCommand(username string, password string) error {
-	if username != "" && password != "" {
-		fmt.Println()
-		Log.Infof("Ionic login")
-
-		cmdArgs := []string{"ionic", "login", username, password}
-		cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
-		cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))
-
-		Log.Donef("$ ionic login *** ***")
-
-		if err := cmd.Run(); err != nil {
-			return fmt.Errorf("command failed, error: %s", err)
-		}
-	}
-	return nil
+// LoginCommand returns ionic login comand model
+func LoginCommand(username string, password string) *command.Model {
+	cmdArgs := []string{"ionic", "login", username, password}
+	return command.New(cmdArgs[0], cmdArgs[1:]...)
 }
 
-// PrepareCommand runs ionic cordova prepare command
-func PrepareCommand(ionicMajorVersion int) error {
+// PrepareCommand returns ionic cordova prepare command model
+func PrepareCommand(ionicMajorVersion int) *command.Model {
 	cmdArgs := []string{"ionic"}
 	if ionicMajorVersion > 2 {
 		cmdArgs = append(cmdArgs, "cordova")
 	}
-
 	cmdArgs = append(cmdArgs, "prepare", "--no-build")
-	cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
-	cmd.SetStdout(os.Stdout).SetStderr(os.Stderr)
-	Log.Donef("$ %s", cmd.PrintableCommandArgs())
-
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("command %s failed, error: %s", cmd.PrintableCommandArgs(), err)
-	}
-	return nil
+	return command.New(cmdArgs[0], cmdArgs[1:]...)
 }

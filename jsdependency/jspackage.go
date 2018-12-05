@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/bitrise-io/go-utils/command"
-	"github.com/bitrise-io/go-utils/errorutil"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 )
@@ -48,7 +47,7 @@ func DetectTool(absPackageJSONDir string) Tool {
 }
 
 // Remove removes installed js dependencies using the selected package manager
-func Remove(packageManager Tool, commandScope CommandScope, pkg ...string) error {
+func Remove(packageManager Tool, commandScope CommandScope, pkg ...string) (*command.Model, error) {
 	return runManagerCmd(packageManager,
 		toolCommandBuilder(packageManager, removeCommand),
 		commandScope,
@@ -56,7 +55,7 @@ func Remove(packageManager Tool, commandScope CommandScope, pkg ...string) error
 }
 
 // Add installs js dependencies using the selected package manager
-func Add(packageManager Tool, commandScope CommandScope, pkg ...string) error {
+func Add(packageManager Tool, commandScope CommandScope, pkg ...string) (*command.Model, error) {
 	return runManagerCmd(packageManager,
 		toolCommandBuilder(packageManager, addCommand),
 		commandScope,
@@ -64,19 +63,26 @@ func Add(packageManager Tool, commandScope CommandScope, pkg ...string) error {
 }
 
 // InstallGlobalDependency installs a global js dependency, removing if installed locally
-func InstallGlobalDependency(packageManager Tool, dependency string, version string) error {
+func InstallGlobalDependency(packageManager Tool, dependency string, version string) ([]*command.Model, error) {
 	if dependency == "" {
-		return errors.New("Dependency name unspecified")
+		return nil, errors.New("Dependency name unspecified")
 	}
-
-	// Yarn returns an error if the package is not added before removal, ignoring
-	if err := Remove(packageManager, Local, dependency); err != nil && packageManager != Yarn {
-		return fmt.Errorf("Failed to remove local %s, error: %s", dependency, err)
+	var cmdSlice []*command.Model
+	{
+		cmd, err := Remove(packageManager, Local, dependency)
+		if err != nil {
+			return nil, err
+		}
+		cmdSlice = append(cmdSlice, cmd)
 	}
-	if err := Add(packageManager, Global, dependency+"@"+version); err != nil {
-		return fmt.Errorf("Failed to install global %s, error: %s", dependency, err)
+	{
+		cmd, err := Add(packageManager, Global, dependency+"@"+version)
+		if err != nil {
+			return nil, err
+		}
+		cmdSlice = append(cmdSlice, cmd)
 	}
-	return nil
+	return cmdSlice, nil
 }
 
 func toolCommandBuilder(packageManger Tool, command managerCommand) string {
@@ -90,7 +96,7 @@ func toolCommandBuilder(packageManger Tool, command managerCommand) string {
 	return "add"
 }
 
-func runManagerCmd(packageManager Tool, packageManagerCmd string, commandScope CommandScope, pkg ...string) error {
+func runManagerCmd(packageManager Tool, packageManagerCmd string, commandScope CommandScope, pkg ...string) (*command.Model, error) {
 	var commandArgs []string
 	switch packageManager {
 	case Npm:
@@ -109,18 +115,7 @@ func runManagerCmd(packageManager Tool, packageManagerCmd string, commandScope C
 	}
 	cmd, err := command.NewFromSlice(commandArgs)
 	if err != nil {
-		return fmt.Errorf("Command creation failed, error: %s", err)
+		return nil, fmt.Errorf("Command creation failed, error: %s", err)
 	}
-
-	fmt.Println()
-	log.Donef("$ %s", cmd.PrintableCommandArgs())
-	fmt.Println()
-
-	if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
-		if errorutil.IsExitStatusError(err) {
-			return fmt.Errorf("%s failed, output: %s", cmd.PrintableCommandArgs(), out)
-		}
-		return fmt.Errorf("%s failed, error: %s", cmd.PrintableCommandArgs(), err)
-	}
-	return nil
+	return cmd, nil
 }

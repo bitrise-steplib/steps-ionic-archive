@@ -1,9 +1,8 @@
-format_version: 4
+format_version: 6
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
-  - STEP_VERSION: 1.2.4
   - ORIG_BITRISE_SOURCE_DIR: $BITRISE_SOURCE_DIR
 
 workflows:
@@ -110,8 +109,6 @@ workflows:
         - ionic_username: $IONIC_USERNAME
         - ionic_password: $IONIC_PASSWORD
         - options: --verbose -- --buildFlag="-UseModernBuildSystem=0"
-        - add_platform: ${READD_PLATFORM}
-        - readd_platform: ${READD_PLATFORM}
     - change-workdir:
         title: Switch back to original working directory
         inputs:
