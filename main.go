@@ -58,7 +58,7 @@ type config struct {
 func installDependency(packageManager jsdependency.Tool, name string, version string) error {
 	fmt.Println()
 	log.Infof("Updating %s version to: %s", name, version)
-	cmdSlice, err := jsdependency.InstallGlobalDependency(packageManager, "cordova", version)
+	cmdSlice, err := jsdependency.InstallGlobalDependency(packageManager, name, version)
 	if err != nil {
 		return fmt.Errorf("Failed to update %s version, error: %s", name, err)
 	}
