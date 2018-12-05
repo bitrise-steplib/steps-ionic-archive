@@ -106,6 +106,7 @@ workflows:
         - target: emulator
         - platform: ios,android
         - ionic_version: latest
+        - cordova_version: latest
         - ionic_username: $IONIC_USERNAME
         - ionic_password: $IONIC_PASSWORD
         - options: --verbose -- --buildFlag="-UseModernBuildSystem=0"
