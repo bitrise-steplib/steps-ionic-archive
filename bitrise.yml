@@ -19,23 +19,23 @@ workflows:
         - node_version: 10.13.0
     after_run:
     - test-with-npm
-    - test-with-npm-no-platform-add
+    - test-with-npm-no-platform-remove
     - test-with-yarn
 
   test-with-npm:
     envs:
     - SAMPLE_APP_URL: https://github.com/bitrise-samples/ionic-conference-app.git
     - BRANCH: update
-    - READD_PLATFORM: true
+    - REMOVE_PLATFORM: true
     - USE_NPM: true
     after_run:
     - _common
 
-  test-with-npm-no-platform-add:
+  test-with-npm-no-platform-remove:
     envs:
     - SAMPLE_APP_URL: https://github.com/bitrise-samples/ionic-conference-app.git
     - BRANCH: update
-    - READD_PLATFORM: false
+    - REMOVE_PLATFORM: false
     - USE_NPM: true
     after_run:
     - _common
@@ -44,7 +44,7 @@ workflows:
     envs:
     - SAMPLE_APP_URL: https://github.com/bitrise-samples/ionic-conference-app.git
     - BRANCH: yarn-test-preadded-platforms
-    - READD_PLATFORM: false
+    - REMOVE_PLATFORM: false
     - USE_NPM: false
     after_run:
     - _common
@@ -81,7 +81,7 @@ workflows:
             [[ -n "${COMMIT}" ]] && git checkout "${COMMIT}" || git checkout "${BRANCH}"
     - script:
         # Needed to test ionic cordova prepare
-        run_if: '{{enveq "READD_PLATFORM" "false"}}'
+        run_if: '{{enveq "REMOVE_PLATFORM" "true"}}'
         inputs:
         - content: rm -rf ./platforms
     - script:
