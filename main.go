@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
 	"sort"
 	"strings"
 	"time"
@@ -149,12 +148,6 @@ func moveAndExportOutputs(outputs []string, deployDir, envKey string, envListKey
 func fail(format string, v ...interface{}) {
 	log.Errorf(format, v...)
 	os.Exit(1)
-}
-
-func getField(c config, field string) string {
-	r := reflect.ValueOf(c)
-	f := reflect.Indirect(r).FieldByName(field)
-	return string(f.String())
 }
 
 func findArtifact(dir, ext string, buildStart time.Time) ([]string, error) {
