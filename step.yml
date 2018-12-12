@@ -5,8 +5,7 @@ description: |-
 
   First, the step prepares your Ionic project by calling:
 
-  - `ionic cordova "platform" "rm" "<platform>"`
-  - `ionic cordova "platform" "add" "<platform>"`
+  - `ionic cordova "prepare" "--no-build"`
 
   After, it archives the project by calling:
 
