@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bitrise-community/steps-ionic-archive/ionic"
-	"github.com/bitrise-community/steps-ionic-archive/jsdependency"
+	"github.com/bitrise-steplib/steps-ionic-archive/ionic"
+	"github.com/bitrise-steplib/steps-ionic-archive/jsdependency"
 	"github.com/bitrise-io/go-utils/colorstring"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/errorutil"

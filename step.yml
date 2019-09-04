@@ -10,9 +10,9 @@ description: |-
   After, it archives the project by calling:
 
   - `ionic cordova "build" "--debug|--release" "--device|--emulator" "<platform>" "--buildConfig=$BITRISE_CORDOVA_BUILD_CONFIGURATION"`
-website: https://github.com/bitrise-community/steps-ionic-archive
-source_code_url: https://github.com/bitrise-community/steps-ionic-archive
-support_url: https://github.com/bitrise-community/steps-ionic-archive/issues
+website: https://github.com/bitrise-steplib/steps-ionic-archive
+source_code_url: https://github.com/bitrise-steplib/steps-ionic-archive
+support_url: https://github.com/bitrise-steplib/steps-ionic-archive/issues
 project_type_tags:
 - ionic
 type_tags:
@@ -23,7 +23,7 @@ deps:
   - name: gradle
 toolkit:
   go:
-    package_name: github.com/bitrise-community/steps-ionic-archive
+    package_name: github.com/bitrise-steplib/steps-ionic-archive
 inputs:
   - platform: "ios,android"
     opts:
