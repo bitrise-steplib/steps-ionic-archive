@@ -52,8 +52,6 @@ type config struct {
 
 	WorkDir   string `env:"workdir,dir"`
 	DeployDir string `env:"BITRISE_DEPLOY_DIR"`
-
-	UseCache bool `env:"cache_local_deps,opt[true,false]"`
 }
 
 func installDependency(packageManager jsdependency.Tool, name string, version string) error {
@@ -469,12 +467,6 @@ func main() {
 		}
 		if len(ipas) == 0 && configs.Target == "device" {
 			fail("no ipas generated")
-		}
-	}
-
-	if configs.UseCache {
-		if err := cacheNpm(workDir); err != nil {
-			log.Warnf("Failed to mark files for caching, error: %s", err)
 		}
 	}
 }
