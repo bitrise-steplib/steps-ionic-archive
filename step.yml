@@ -19,14 +19,14 @@ description: |-
   If you set the **Build configuration** input in the **Generate Cordova Build Configuration** Step to `release`, then you need to use the release configuration in the **Ionic Archive** Step as well.
 
   ### Useful links
-  [Getting started with Ionic/Cordova apps on Bitrise](https://devcenter.bitrise.io/code-signing/android-code-signing/android-code-signing-using-bitrise-sign-apk-step/)
-  [Secret Environment Variables on Bitrise](https://devcenter.bitrise.io/builds/env-vars-secret-env-vars/)
-  [Ionic framework](https://ionicframework.com/)
+  - [Getting started with Ionic/Cordova apps on Bitrise](https://devcenter.bitrise.io/code-signing/android-code-signing/android-code-signing-using-bitrise-sign-apk-step/)
+  - [Secret Environment Variables on Bitrise](https://devcenter.bitrise.io/builds/env-vars-secret-env-vars/)
+  - [Ionic framework](https://ionicframework.com/)
 
   ### Related Steps
-  [Generate Cordova Build Configuration](https://www.bitrise.io/integrations/steps/android-build)
-  [Run npm command](https://www.bitrise.io/integrations/steps/npm)
-  [Cordova Archive](https://www.bitrise.io/integrations/steps/cordova-archive)
+  - [Generate Cordova Build Configuration](https://www.bitrise.io/integrations/steps/android-build)
+  - [Run npm command](https://www.bitrise.io/integrations/steps/npm)
+  - [Cordova Archive](https://www.bitrise.io/integrations/steps/cordova-archive)
   
 website: https://github.com/bitrise-community/steps-ionic-archive
 source_code_url: https://github.com/bitrise-community/steps-ionic-archive
