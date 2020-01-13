@@ -1,15 +1,33 @@
 title: Ionic archive
-summary: Archives your Ionic project
+summary: Generates builds for the requested platforms.
 description: |-
-  Archives your Ionic project.
+  Generates an iOS, Android or an iOS and Android build based on your Step settings and a `build.json` file which is inherited from the **Generate cordova build configuration** Step.
+ 
+  ### Configuring the Step
+  1. In the **Platform to use in ionic-cli commands** input, select the platform you wish to build for from the drop-down menu.
+  2. In the **Build command configuration** input, select either `debug` or `release` mode from the drop-down menu. If you set `release` to generate a release build, then you should select `device` instead of `emulator` in the **Build command target**.
+  3. Select either `emulator` or `device` in the **Build command target** field.
+  4. Make sure the file path set in the **Working directory** is pointing to the path where your project's code got downloaded to.
+  If you're using any services of the Ionic framework which requires login credentials, you have to provide those in the **Ionic username** and **Ionic password** inputs. Don't worry, these are stored as secret Environment Variables.
+  If you wish to to modify your native projects by inserting the **Ionic Prepare** Step before the **Ionic Archive** Step, then make sure you set the **Should `ionic cordova prepare` be executed before `ionic cordova build`?** input to `false` in the **Ionic Archive** Step.
+  The **Build configuration path to describe code signing properties** input is automatically filled out with the output Environment Variable of the **Generate cordova build configuation** Step. You do not need to modify this input.
 
-  First, the step prepares your Ionic project by calling:
+  ### Troubleshooting
+  Make sure you add the **Ionic Archive** Step AFTER the **Generate cordova build configuration** Step as the latter generates the build config file which the **Ionic Archive** Step uses to successfully build an iOS and/or Android project.
+  Make sure you insert the **Ionic Archive** Step BEFORE any deploy Step.
+  Note that if you’re building for both iOS and Android in one workflow, and either of your apps fails, the whole **Ionic Archive** Step will fail.
+  If you set the **Build configuration** input in the **Generate Cordova Build Configuration** Step to `release`, then you need to use the release configuration in the **Ionic Archive** Step as well.
 
-  - `ionic cordova "prepare" "--no-build"`
+  ### Useful links
+  - [Getting started with Ionic/Cordova apps on Bitrise](https://devcenter.bitrise.io/code-signing/android-code-signing/android-code-signing-using-bitrise-sign-apk-step/)
+  - [Secret Environment Variables on Bitrise](https://devcenter.bitrise.io/builds/env-vars-secret-env-vars/)
+  - [Ionic framework](https://ionicframework.com/)
 
-  After, it archives the project by calling:
-
-  - `ionic cordova "build" "--debug|--release" "--device|--emulator" "<platform>" "--buildConfig=$BITRISE_CORDOVA_BUILD_CONFIGURATION"`
+  ### Related Steps
+  - [Generate Cordova Build Configuration](https://www.bitrise.io/integrations/steps/android-build)
+  - [Run npm command](https://www.bitrise.io/integrations/steps/npm)
+  - [Cordova Archive](https://www.bitrise.io/integrations/steps/cordova-archive)
+  
 website: https://github.com/bitrise-community/steps-ionic-archive
 source_code_url: https://github.com/bitrise-community/steps-ionic-archive
 support_url: https://github.com/bitrise-community/steps-ionic-archive/issues
