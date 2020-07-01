@@ -28,9 +28,9 @@ description: |-
   - [Run npm command](https://www.bitrise.io/integrations/steps/npm)
   - [Cordova Archive](https://www.bitrise.io/integrations/steps/cordova-archive)
   
-website: https://github.com/bitrise-community/steps-ionic-archive
-source_code_url: https://github.com/bitrise-community/steps-ionic-archive
-support_url: https://github.com/bitrise-community/steps-ionic-archive/issues
+website: https://github.com/bitrise-steplib/steps-ionic-archive
+source_code_url: https://github.com/bitrise-steplib/steps-ionic-archive
+support_url: https://github.com/bitrise-steplib/steps-ionic-archive/issues
 project_type_tags:
 - ionic
 type_tags:
@@ -41,7 +41,7 @@ deps:
   - name: gradle
 toolkit:
   go:
-    package_name: github.com/bitrise-community/steps-ionic-archive
+    package_name: github.com/bitrise-steplib/steps-ionic-archive
 inputs:
   - platform: "ios,android"
     opts:
