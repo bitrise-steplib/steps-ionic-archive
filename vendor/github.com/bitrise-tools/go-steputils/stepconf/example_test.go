@@ -5,11 +5,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bitrise-tools/go-steputils/stepconf"
+	"github.com/bitrise-io/go-steputils/stepconf"
 )
 
 type config struct {
-
 	// Env vars specified in the struct tags are converted to the respective basic data types.
 	Name        string `env:"name"`
 	BuildNumber int    `env:"build_number"`
@@ -36,6 +35,9 @@ type config struct {
 	// Value options can be listed using the notation "opt[opt1,opt2,opt3]".
 	// The value of the env var should be one of the options.
 	ExportMethod string `env:"export_method,opt[dev,qa,prod]"`
+
+	// Version
+	Version string `env:"version,range[0..9]"`
 }
 
 var envs = map[string]string{
@@ -49,6 +51,7 @@ var envs = map[string]string{
 	"tmpfile":       "/etc/hosts",
 	"tmpdir":        "/tmp",
 	"export_method": "dev",
+	"version":       "",
 }
 
 func TestExample(t *testing.T) {

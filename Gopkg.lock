@@ -2,30 +2,19 @@
 
 
 [[projects]]
-  digest = "1:9d9d1b08516057c84f0dc4f6c7ce6a7534f4d8962b9a073f9b407f118b310e03"
-  name = "github.com/bitrise-community/steps-ionic-archive"
-  packages = [
-    "ionic",
-    "jsdependency",
-  ]
-  pruneopts = ""
-  revision = "42a4fa1cd6b4d67cf659f3f92afea4ed4615bb55"
-  version = "2.0.0"
-
-[[projects]]
   branch = "master"
-  digest = "1:510cb6dddad542f24598cbb8dd8bc4dd0ff460284d459d118c9d475334e2a337"
+  digest = "1:3f9586f16dd59d6519cfbc675a63acfd6746aca19bd9cbc1d33fbf06b30ddbfd"
   name = "github.com/bitrise-io/go-steputils"
   packages = [
     "cache",
     "tools",
   ]
   pruneopts = ""
-  revision = "f540824d77dfd382ce84fd0ee0a9da2fba1cce0a"
+  revision = "94490ca44ddb645764676a94988f6fc7e3187383"
 
 [[projects]]
   branch = "master"
-  digest = "1:6083fc4e90fe661aad326c42fa16fb85774cb55711560d1208c82ff290534836"
+  digest = "1:0bf2b55fee2a2e1fbe093fe9278a64f4c3d5646c090978c5cb82ba9bcfca48c7"
   name = "github.com/bitrise-io/go-utils"
   packages = [
     "colorstring",
@@ -39,26 +28,34 @@
     "ziputil",
   ]
   pruneopts = ""
-  revision = "2a09aab8380d7842750328aebd5671bcccea89c8"
+  revision = "0c47c16813a4209321c9d0dba2e75867d6901ff2"
 
 [[projects]]
   branch = "master"
-  digest = "1:3511df2e558e2755b01ce5670ddc536fa031e63e5b4974bb0f35aac53704f06e"
+  digest = "1:3f9586f16dd59d6519cfbc675a63acfd6746aca19bd9cbc1d33fbf06b30ddbfd"
   name = "github.com/bitrise-tools/go-steputils"
   packages = [
     "stepconf",
     "tools",
   ]
   pruneopts = ""
-  revision = "ec226b2359fcd806be64f0ad2217d8e741a1ff11"
+  revision = "94490ca44ddb645764676a94988f6fc7e3187383"
+
+[[projects]]
+  digest = "1:0deddd908b6b4b768cfc272c16ee61e7088a60f7fe2f06c547bd3d8e1f8b8e77"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = ""
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
 
 [[projects]]
   branch = "master"
-  digest = "1:8c7fb7f81c06add10a17362abc1ae569ff9765a26c061c6b6e67c909f4f414db"
+  digest = "1:ebffb4b4c8ddcf66bb549464183ea2ddbac6c58a803658f67249f83395d17455"
   name = "github.com/hashicorp/go-version"
   packages = ["."]
   pruneopts = ""
-  revision = "b5a281d3160aa11950a6182bd9a9dc2cb1e02d50"
+  revision = "59da58cfd357de719a4d16dac30481391a56c002"
 
 [[projects]]
   branch = "master"
@@ -70,18 +67,43 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:bb44a58f311cb023bbd17ac9557676d5292b311b80624ce9c20a9eae88ef8c0a"
+  digest = "1:c45802472e0c06928cd997661f2af610accd85217023b1d5f6331bebce0671d3"
   name = "github.com/pkg/errors"
   packages = ["."]
   pruneopts = ""
-  revision = "059132a15dd08d6704c67711dae0cf35ab991756"
+  revision = "614d223910a179a466c1767a985424175c39b465"
+
+[[projects]]
+  digest = "1:256484dbbcd271f9ecebc6795b2df8cad4c458dd0f5fd82a8c2fa0c29f233411"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = ""
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:83fd2513b9f6ae0997bf646db6b74e9e00131e31002116fda597175f25add42d"
+  name = "github.com/stretchr/testify"
+  packages = [
+    "assert",
+    "require",
+  ]
+  pruneopts = ""
+  revision = "f654a9112bbeac49ca2cd45bfbe11533c4666cf8"
+  version = "v1.6.1"
+
+[[projects]]
+  branch = "v3"
+  digest = "1:2e9c4d6def1d36dcd17730e00c06b49a2e97ea5e1e639bcd24fa60fa43e33ad6"
+  name = "gopkg.in/yaml.v3"
+  packages = ["."]
+  pruneopts = ""
+  revision = "eeeca48fe7764f320e4870d231902bf9c1be2c08"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/bitrise-community/steps-ionic-archive/ionic",
-    "github.com/bitrise-community/steps-ionic-archive/jsdependency",
     "github.com/bitrise-io/go-steputils/cache",
     "github.com/bitrise-io/go-utils/colorstring",
     "github.com/bitrise-io/go-utils/command",
@@ -95,6 +117,7 @@
     "github.com/hashicorp/go-version",
     "github.com/kballard/go-shellquote",
     "github.com/pkg/errors",
+    "github.com/stretchr/testify/require",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
