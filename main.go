@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -168,6 +170,25 @@ func findArtifact(dir, ext string, buildStart time.Time) ([]string, error) {
 	return matches, nil
 }
 
+func parseMajorVersion(version string) (uint64, error) {
+	matcher := regexp.MustCompile(`(\d+)(.\d+)*`)
+	matches := matcher.FindStringSubmatch(version)
+	if matches == nil {
+		return 0, fmt.Errorf("failed to parse ionic major version (%s): no match", version)
+	}
+
+	if len(matches) < 2 {
+		return 0, fmt.Errorf("failed to parse ionic major version (%s): unexpected match", version)
+	}
+
+	majorVersion, err := strconv.ParseUint(matches[1], 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse ionic major version (%s): %s", version, err)
+	}
+
+	return majorVersion, nil
+}
+
 func main() {
 	// Parse inputs
 	var configs config
@@ -217,7 +238,17 @@ func main() {
 		}
 	}
 	if configs.IonicVersion != "" {
-		if err := installDependency(packageManager, "ionic", configs.IonicVersion); err != nil {
+		packageName := "@ionic/cli"
+		if configs.IonicVersion != "latest" {
+			majorVersion, err := parseMajorVersion(configs.IonicVersion)
+			if err != nil {
+				log.Warnf("%s", err)
+			} else if majorVersion < 6 {
+				packageName = "ionic"
+			}
+		}
+
+		if err := installDependency(packageManager, packageName, configs.IonicVersion); err != nil {
 			fail("%s", err)
 		}
 	}
@@ -336,7 +367,6 @@ func main() {
 			}
 
 			cmdArgs = append(cmdArgs, options...)
-			cmdArgs = append(cmdArgs)
 
 			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
 			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))
