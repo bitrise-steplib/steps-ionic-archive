@@ -73,6 +73,15 @@ func InstallGlobalDependencyCommand(packageManager Tool, dependency string, vers
 		}
 		cmdSlice = append(cmdSlice, cmd)
 	}
+	if packageManager == Yarn {
+		// Yarn does not link binary (for example ionic) if it exists installed by an other package.
+		// If ionic@5.4.16 is installed, adding @ionic/cli will not be the default version.
+		cmd, err := RemoveCommand(packageManager, Global, dependency)
+		if err != nil {
+			return nil, err
+		}
+		cmdSlice = append(cmdSlice, cmd)
+	}
 	{
 		cmd, err := AddCommand(packageManager, Global, dependency+"@"+version)
 		if err != nil {
