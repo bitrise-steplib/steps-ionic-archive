@@ -103,6 +103,7 @@ func createManagerCmd(packageManager Tool, packageManagerCmd string, commandScop
 			commandArgs = append(commandArgs, "-g")
 		}
 		commandArgs = append(commandArgs, pkg...)
+		commandArgs = append(commandArgs, "--force")
 	case Yarn:
 		commandArgs = []string{"yarn"}
 		if commandScope == Global {
