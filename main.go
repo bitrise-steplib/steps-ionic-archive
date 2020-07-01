@@ -4,14 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/bitrise-community/steps-ionic-archive/ionic"
-	"github.com/bitrise-community/steps-ionic-archive/jsdependency"
 	"github.com/bitrise-io/go-utils/colorstring"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/errorutil"
@@ -19,6 +15,8 @@ import (
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/sliceutil"
 	"github.com/bitrise-io/go-utils/ziputil"
+	"github.com/bitrise-steplib/steps-ionic-archive/ionic"
+	"github.com/bitrise-steplib/steps-ionic-archive/jsdependency"
 	"github.com/bitrise-tools/go-steputils/stepconf"
 	"github.com/bitrise-tools/go-steputils/tools"
 	ver "github.com/hashicorp/go-version"
@@ -170,25 +168,6 @@ func findArtifact(dir, ext string, buildStart time.Time) ([]string, error) {
 	return matches, nil
 }
 
-func parseMajorVersion(version string) (uint64, error) {
-	matcher := regexp.MustCompile(`(\d+)(.\d+)*`)
-	matches := matcher.FindStringSubmatch(version)
-	if matches == nil {
-		return 0, fmt.Errorf("failed to parse ionic major version (%s): no match", version)
-	}
-
-	if len(matches) < 2 {
-		return 0, fmt.Errorf("failed to parse ionic major version (%s): unexpected match", version)
-	}
-
-	majorVersion, err := strconv.ParseUint(matches[1], 10, 64)
-	if err != nil {
-		return 0, fmt.Errorf("failed to parse ionic major version (%s): %s", version, err)
-	}
-
-	return majorVersion, nil
-}
-
 func main() {
 	// Parse inputs
 	var configs config
@@ -238,14 +217,9 @@ func main() {
 		}
 	}
 	if configs.IonicVersion != "" {
-		packageName := "@ionic/cli"
-		if configs.IonicVersion != "latest" {
-			majorVersion, err := parseMajorVersion(configs.IonicVersion)
-			if err != nil {
-				log.Warnf("%s", err)
-			} else if majorVersion < 6 {
-				packageName = "ionic"
-			}
+		packageName, err := ionic.PackageNameFromVersion(configs.IonicVersion)
+		if err != nil {
+			log.Warnf("%s", err)
 		}
 
 		if err := installDependency(packageManager, packageName, configs.IonicVersion); err != nil {

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/bitrise-io/go-utils/command"
@@ -74,4 +75,44 @@ func PrepareCommand(ionicMajorVersion int) *command.Model {
 	}
 	cmdArgs = append(cmdArgs, "prepare", "--no-build")
 	return command.New(cmdArgs[0], cmdArgs[1:]...)
+}
+
+// PackageNameFromVersion returns either "ionic" or "@ionic/cli" based on the required version
+// "ionic" is deprecated: https://www.npmjs.com/package/ionic
+// "@ionic/cli" starts from version 6.0.0: https://www.npmjs.com/package/@ionic/cli
+func PackageNameFromVersion(version string) (string, error) {
+	newPackageName := "@ionic/cli"
+	if version == "latest" {
+		return newPackageName, nil
+	}
+
+	majorVersion, err := parseMajorVersion(version)
+	if err != nil {
+		return newPackageName, err
+	}
+
+	if majorVersion < 6 {
+		return "ionic", nil
+	}
+
+	return newPackageName, nil
+}
+
+func parseMajorVersion(version string) (uint64, error) {
+	matcher := regexp.MustCompile(`(\d+)(.\d+)*`)
+	matches := matcher.FindStringSubmatch(version)
+	if matches == nil {
+		return 0, fmt.Errorf("failed to parse ionic major version (%s): no match", version)
+	}
+
+	if len(matches) < 2 {
+		return 0, fmt.Errorf("failed to parse ionic major version (%s): unexpected match", version)
+	}
+
+	majorVersion, err := strconv.ParseUint(matches[1], 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse ionic major version (%s): %s", version, err)
+	}
+
+	return majorVersion, nil
 }
