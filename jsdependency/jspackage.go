@@ -35,6 +35,14 @@ const (
 	removeCommand managerCommand = "remove"
 )
 
+// InstallCommand contains the command to be executed and
+// wether the resulting error can be ignored.
+// (yarn exits with error if removing a not yet added package)
+type InstallCommand struct {
+	Slice       *command.Model
+	IgnoreError bool
+}
+
 // DetectTool returns the Js package manager used, e.g. npm or yarn
 func DetectTool(absPackageJSONDir string) (Tool, error) {
 	if exist, err := pathutil.IsPathExists(filepath.Join(absPackageJSONDir, "yarn.lock")); err != nil {
@@ -59,11 +67,6 @@ func AddCommand(packageManager Tool, commandScope CommandScope, pkg ...string) (
 		toolCommandBuilder(packageManager, addCommand),
 		commandScope,
 		pkg...)
-}
-
-type InstallCommand struct {
-	Slice       *command.Model
-	IgnoreError bool
 }
 
 // InstallGlobalDependencyCommand returns command model to install a global js dependency
