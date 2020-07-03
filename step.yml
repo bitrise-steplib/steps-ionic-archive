@@ -28,9 +28,9 @@ description: |-
   - [Run npm command](https://www.bitrise.io/integrations/steps/npm)
   - [Cordova Archive](https://www.bitrise.io/integrations/steps/cordova-archive)
   
-website: https://github.com/bitrise-community/steps-ionic-archive
-source_code_url: https://github.com/bitrise-community/steps-ionic-archive
-support_url: https://github.com/bitrise-community/steps-ionic-archive/issues
+website: https://github.com/bitrise-steplib/steps-ionic-archive
+source_code_url: https://github.com/bitrise-steplib/steps-ionic-archive
+support_url: https://github.com/bitrise-steplib/steps-ionic-archive/issues
 project_type_tags:
 - ionic
 type_tags:
@@ -41,7 +41,7 @@ deps:
   - name: gradle
 toolkit:
   go:
-    package_name: github.com/bitrise-community/steps-ionic-archive
+    package_name: github.com/bitrise-steplib/steps-ionic-archive
 inputs:
   - platform: "ios,android"
     opts:
@@ -82,13 +82,13 @@ inputs:
       title: "Build configuration path, to describe code signing properties"
       description: |-
         Path to the build configuration file (build.json), which describes code signing properties.
-  - options: -- --buildFlag="-UseModernBuildSystem=0"
+  - options:
     opts:
       title: "Options to append to the ionic-cli build command"
       description: |-
         Use this input to specify custom options, to append to the end of the ionic-cli build command.
 
-        Cordova does not yet support the new build system made default in XCode 10 (https://github.com/apache/cordova-ios/issues/407).
+        Cordova now supports the new build system made default in XCode 10 (https://github.com/apache/cordova-ios/issues/407).
         To use the legacy build system add `-- --buildFlag="-UseModernBuildSystem=0"` to the options string.
 
         Example:

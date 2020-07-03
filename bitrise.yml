@@ -1,4 +1,4 @@
-format_version: 6
+format_version: 10
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
@@ -14,43 +14,33 @@ workflows:
     - golint:
     - errcheck:
     - go-test:
-    - nvm@1.2.2:
-        inputs:
-        - node_version: 10.13.0
     after_run:
     - test-with-npm
-    - test-with-npm-no-platform-remove
     - test-with-yarn
 
   test-with-npm:
     envs:
-    - SAMPLE_APP_URL: https://github.com/bitrise-samples/ionic-conference-app.git
-    - BRANCH: update
-    - REMOVE_PLATFORM: true
-    - USE_NPM: true
-    after_run:
-    - _common
-
-  test-with-npm-no-platform-remove:
-    envs:
-    - SAMPLE_APP_URL: https://github.com/bitrise-samples/ionic-conference-app.git
-    - BRANCH: update
-    - REMOVE_PLATFORM: false
+    - SAMPLE_APP_URL: https://github.com/bitrise-io/ionic-conference-app.git
+    - BRANCH: latest
+    - IONIC_VERSION: latest
     - USE_NPM: true
     after_run:
     - _common
 
   test-with-yarn:
     envs:
-    - SAMPLE_APP_URL: https://github.com/bitrise-samples/ionic-conference-app.git
-    - BRANCH: yarn-test-preadded-platforms
-    - REMOVE_PLATFORM: false
+    - SAMPLE_APP_URL: https://github.com/bitrise-io/ionic-conference-app.git
+    - BRANCH: latest
+    - IONIC_VERSION: latest
     - USE_NPM: false
     after_run:
     - _common
 
   _common:
     steps:
+    - nvm@1:
+        inputs:
+        - node_version: '12'
     - script:
         inputs:
         - content: |-
@@ -79,37 +69,45 @@ workflows:
             git remote add origin "${SAMPLE_APP_URL}"
             git fetch || exit 1
             [[ -n "${COMMIT}" ]] && git checkout "${COMMIT}" || git checkout "${BRANCH}"
-    - script:
-        # Needed to test ionic cordova prepare
-        run_if: '{{enveq "REMOVE_PLATFORM" "true"}}'
-        inputs:
-        - content: rm -rf ./platforms
-    - script:
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            rm -rf node_modules; rm package-lock.json || true
     - npm:
         run_if: '{{enveq "USE_NPM" "true"}}'
         inputs:
         - workdir: ./
         - command: install
+    - npm:
+        # Workaround for https://github.com/ionic-team/ionic-cli/issues/4262
+        run_if: '{{enveq "USE_NPM" "true"}}'
+        inputs:
+        - workdir: ./
+        - command: install "@angular-devkit/build-angular@~0.801.2"
+    - script:
+        run_if: '{{enveq "USE_NPM" "false"}}'
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            # rm -rf node_modules; rm package-lock.json || true
     - yarn:
         run_if: '{{enveq "USE_NPM" "false"}}'
         inputs:
         - workdir: ./
         - command: install
+    - yarn:
+        # Workaround for https://github.com/ionic-team/ionic-cli/issues/4262
+        run_if: '{{enveq "USE_NPM" "false"}}'
+        inputs:
+        - workdir: ./
+        - command: add "@angular-devkit/build-angular@~0.801.2"
     - path::./:
         title: Step Test
         inputs:
         - workdir: ./
         - target: emulator
         - platform: ios,android
-        - ionic_version: latest
+        - ionic_version: $IONIC_VERSION
         - cordova_version: latest
         - ionic_username: $IONIC_USERNAME
         - ionic_password: $IONIC_PASSWORD
-        - options: --verbose -- --buildFlag="-UseModernBuildSystem=0"
+        - options: --verbose
     - change-workdir:
         title: Switch back to original working directory
         inputs:

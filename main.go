@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bitrise-community/steps-ionic-archive/ionic"
-	"github.com/bitrise-community/steps-ionic-archive/jsdependency"
 	"github.com/bitrise-io/go-utils/colorstring"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/errorutil"
@@ -17,6 +15,8 @@ import (
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/sliceutil"
 	"github.com/bitrise-io/go-utils/ziputil"
+	"github.com/bitrise-steplib/steps-ionic-archive/ionic"
+	"github.com/bitrise-steplib/steps-ionic-archive/jsdependency"
 	"github.com/bitrise-tools/go-steputils/stepconf"
 	"github.com/bitrise-tools/go-steputils/tools"
 	ver "github.com/hashicorp/go-version"
@@ -59,21 +59,21 @@ type config struct {
 func installDependency(packageManager jsdependency.Tool, name string, version string) error {
 	fmt.Println()
 	log.Infof("Updating %s version to: %s", name, version)
+
 	cmdSlice, err := jsdependency.InstallGlobalDependencyCommand(packageManager, name, version)
 	if err != nil {
 		return fmt.Errorf("Failed to update %s version, error: %s", name, err)
 	}
-	for i, cmd := range cmdSlice {
+	for _, cmd := range cmdSlice {
 		fmt.Println()
-		log.Donef("$ %s", cmd.PrintableCommandArgs())
-		fmt.Println()
+		log.Donef("$ %s", cmd.Slice.PrintableCommandArgs())
 
 		// Yarn returns an error if the package is not added before removal, ignoring
-		if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil && !(packageManager == jsdependency.Yarn && i == 0) {
+		if out, err := cmd.Slice.RunAndReturnTrimmedCombinedOutput(); err != nil && !cmd.IgnoreError {
 			if errorutil.IsExitStatusError(err) {
-				return fmt.Errorf("Failed to update %s version: %s failed, output: %s", name, cmd.PrintableCommandArgs(), out)
+				return fmt.Errorf("Failed to update %s version, output: %s", name, out)
 			}
-			return fmt.Errorf("Failed to update %s version: %s failed, error: %s", name, cmd.PrintableCommandArgs(), err)
+			return fmt.Errorf("Failed to update %s version, error: %s", name, err)
 		}
 	}
 	return nil
@@ -217,7 +217,12 @@ func main() {
 		}
 	}
 	if configs.IonicVersion != "" {
-		if err := installDependency(packageManager, "ionic", configs.IonicVersion); err != nil {
+		packageName, err := ionic.PackageNameFromVersion(configs.IonicVersion)
+		if err != nil {
+			log.Warnf("%s", err)
+		}
+
+		if err := installDependency(packageManager, packageName, configs.IonicVersion); err != nil {
 			fail("%s", err)
 		}
 	}
@@ -336,7 +341,6 @@ func main() {
 			}
 
 			cmdArgs = append(cmdArgs, options...)
-			cmdArgs = append(cmdArgs)
 
 			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
 			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))
