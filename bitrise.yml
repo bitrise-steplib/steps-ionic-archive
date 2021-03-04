@@ -15,6 +15,45 @@ workflows:
     after_run:
     - test_with_npm
     - test_with_yarn
+    - test_ios_device_build
+
+  test_ios_device_build:
+    before_run:
+    - _setup_test_project
+    - _setup_environment
+    - _install-dependencies-with-npm
+    steps:
+    - ionic-prepare:
+        inputs:
+        - platform: ios
+        - ionic_version: latest
+    - git::https://github.com/bitrise-steplib/steps-ios-auto-provision-appstoreconnect@STEP-586-update-xcode-project:
+        run_if: true
+        inputs:
+        - distribution_type: development
+        - project_path: $ORIG_BITRISE_SOURCE_DIR/_tmp/platforms/ios/Ionic Conference App.xcworkspace
+        - scheme: Ionic Conference App
+        - connection: 'off'
+        - api_key_path: $BITRISEIO_ASC_API_KEY_URL
+        - api_issuer: $ASC_ISSUER
+    - generate-cordova-build-configuration:
+        inputs:
+        - configuration: release
+        - development_team: $BITRISE_DEVELOPER_TEAM
+        - code_sign_identity: $BITRISE_DEVELOPMENT_CODESIGN_IDENTITY
+        - provisioning_profile: $BITRISE_DEVELOPMENT_PROFILE
+        - package_type: $BITRISE_EXPORT_METHOD
+    - path::./:
+        title: Step Test
+        inputs:
+        - target: device
+        - platform: ios
+        - run_ionic_prepare: false
+        - ionic_version: latest
+        - cordova_version: latest
+        - ionic_username: $IONIC_USERNAME
+        - ionic_password: $IONIC_PASSWORD
+        - options: --verbose
 
   test_with_npm:
     before_run:
