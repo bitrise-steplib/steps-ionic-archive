@@ -27,7 +27,7 @@ workflows:
         inputs:
         - platform: ios
         - ionic_version: latest
-    - git::https://github.com/bitrise-steplib/steps-ios-auto-provision-appstoreconnect@STEP-586-update-xcode-project:
+    - ios-auto-provision-appstoreconnect:
         run_if: true
         inputs:
         - distribution_type: development
