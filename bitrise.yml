@@ -4,7 +4,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 app:
   envs:
   - TEST_PROJECT_URL: https://github.com/bitrise-io/ionic-conference-app.git
-  - TEST_PROJECT_BRANCH: latest
+  - TEST_PROJECT_BRANCH: master
   - ORIG_BITRISE_SOURCE_DIR: $BITRISE_SOURCE_DIR
 
 workflows:
