@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/bitrise-io/go-utils/command"
+	"github.com/bitrise-io/go-utils/log"
 	ver "github.com/hashicorp/go-version"
 	"github.com/pkg/errors"
 )
@@ -45,20 +46,12 @@ func Version() (*ver.Version, error) {
 }
 
 // CordovaVersion returns cordova version
-func CordovaVersion() (*ver.Version, error) {
-	cmd := command.New("cordova", "-v")
-	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
-	if err != nil {
-		return nil, err
-	}
-	out = strings.Split(out, "(")[0]
-	out = strings.TrimSpace(out)
+func CordovaVersion() error {
+	log.Infof("Cordova version:")
+	cmd := command.NewWithStandardOuts("cordova", "-v")
 
-	version, err := ver.NewVersion(out)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse version: %s", out)
-	}
-	return version, nil
+	log.Infof("$ %s", cmd.PrintableCommandArgs())
+	return cmd.Run()
 }
 
 // LoginCommand returns ionic login comand model
