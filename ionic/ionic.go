@@ -51,12 +51,7 @@ func CordovaVersion() error {
 	cmd := command.NewWithStandardOuts("cordova", "-v")
 
 	log.Infof("$ %s", cmd.PrintableCommandArgs())
-	err := cmd.Run()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return cmd.Run()
 }
 
 // LoginCommand returns ionic login comand model
