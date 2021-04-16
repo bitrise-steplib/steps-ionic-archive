@@ -3,15 +3,14 @@ package ionic
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/bitrise-io/go-utils/command"
+	"github.com/bitrise-io/go-utils/log"
 	ver "github.com/hashicorp/go-version"
 	"github.com/pkg/errors"
-	"github.com/bitrise-io/go-utils/log"
 )
 
 // Version returns ionic version
@@ -49,7 +48,7 @@ func Version() (*ver.Version, error) {
 // CordovaVersion returns cordova version
 func CordovaVersion() error {
 	log.Infof("Cordova version:")
-	cmd := command.New("cordova", "-v").SetStdout(os.Stdout).SetStderr(os.Stderr)
+	cmd := command.NewWithStandardOuts("cordova", "-v")
 
 	log.Infof("$ %s", cmd.PrintableCommandArgs())
 	err := cmd.Run()

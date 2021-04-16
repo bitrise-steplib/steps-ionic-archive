@@ -227,7 +227,6 @@ func main() {
 		}
 	}
 
-	// Print cordova and ionic version
 	fmt.Println()
 	if err := ionic.CordovaVersion(); err != nil {
 		fail("Failed to get cordova version, error: %s", err)
