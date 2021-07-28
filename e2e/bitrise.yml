@@ -3,8 +3,12 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
+    # Shared test configs
     - TEST_APP_URL: https://github.com/bitrise-io/ionic-conference-app.git
     - TEST_APP_BRANCH: master
+    # Shared test secrets
+    - APPSTORECONNECT_API_KEY_URL: $APPSTORECONNECT_API_KEY_URL
+    - APPSTORECONNECT_API_KEY_ISSUER: $APPSTORECONNECT_API_KEY_ISSUER
 
 workflows:
   test_ios_device_build:
@@ -26,8 +30,8 @@ workflows:
             - project_path: $BITRISE_SOURCE_DIR/_tmp/platforms/ios/Ionic Conference App.xcworkspace
             - scheme: Ionic Conference App
             - connection: 'off'
-            - api_key_path: $BITRISEIO_ASC_API_KEY_URL
-            - api_issuer: $ASC_ISSUER
+            - api_key_path: $APPSTORECONNECT_API_KEY_URL
+            - api_issuer: $APPSTORECONNECT_API_KEY_ISSUER
       - generate-cordova-build-configuration:
           inputs:
             - configuration: release
