@@ -51,10 +51,10 @@ func CordovaVersion() (*ver.Version, error) {
 	if err != nil {
 		return nil, err
 	}
-	re := regexp.MustCompile(".*[0-9]+\\.[0-9]+\\.[0-9].*")
+	re := regexp.MustCompile("(?:.*[^0-9])?([0-9]+\\.[0-9]+\\.[0-9]+)(?:[^0-9].*)?")
 	matches := re.FindStringSubmatch(out)
 	if len(matches) < 2 {
-		return nil, errors.Wrapf(err, "failed to parse version: %s", out)
+		return nil, fmt.Errorf("failed to parse version: %s", out)
 	}
 	out = matches[1]
 
