@@ -69,6 +69,7 @@ workflows:
             - ionic_username: $IONIC_USERNAME
             - ionic_password: $IONIC_PASSWORD
             - options: --verbose
+            - workdir: $BITRISE_SOURCE_DIR/_tmp
 
   _setup:
     steps:
