@@ -93,27 +93,32 @@ workflows:
     steps:
       - npm:
           inputs:
+            - workdir: $BITRISE_SOURCE_DIR/_tmp
             - command: install
       - npm:
           # Workaround for https://github.com/ionic-team/ionic-cli/issues/4262
           inputs:
+            - workdir: $BITRISE_SOURCE_DIR/_tmp
             - command: install "@angular-devkit/build-angular@~0.801.2"
 
   _install_dependencies_with_yarn:
     steps:
       - yarn:
           inputs:
+            - workdir: $BITRISE_SOURCE_DIR/_tmp
             - command: import
       - script:
           inputs:
             - content: |-
                 #!/usr/bin/env bash
                 set -ex
-                rm -rf node_modules; rm package-lock.json || true
+                rm -rf _tmp/node_modules; rm _tmp/package-lock.json || true
       - yarn:
           inputs:
+            - workdir: $BITRISE_SOURCE_DIR/_tmp
             - command: install
       - yarn:
           # Workaround for https://github.com/ionic-team/ionic-cli/issues/4262
           inputs:
+            - workdir: $BITRISE_SOURCE_DIR/_tmp
             - command: add "@angular-devkit/build-angular@~0.801.2"
