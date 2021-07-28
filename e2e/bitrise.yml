@@ -9,8 +9,8 @@ app:
     # Shared test secrets
     - APPSTORECONNECT_API_KEY_URL: $APPSTORECONNECT_API_KEY_URL
     - APPSTORECONNECT_API_KEY_ISSUER: $APPSTORECONNECT_API_KEY_ISSUER
-    - APPLE_CERTIFICATE_URL_LIST: $APPLE_CERTIFICATE_URL_LIST
-    - APPLE_CERTIFICATE_PASSHRASE_LIST: $APPLE_CERTIFICATE_PASSHRASE_LIST
+    - IOS_APPLE_CERTIFICATE_URL_LIST: $IOS_APPLE_CERTIFICATE_URL_LIST
+    - IOS_APPLE_CERTIFICATE_PASSHRASE: $IOS_APPLE_CERTIFICATE_PASSHRASE
     - IONIC_USERNAME: $IONIC_USERNAME
     - IONIC_PASSWORD: $IONIC_PASSWORD
 
@@ -36,8 +36,8 @@ workflows:
             - connection: 'off'
             - api_key_path: $APPSTORECONNECT_API_KEY_URL
             - api_issuer: $APPSTORECONNECT_API_KEY_ISSUER
-            - certificate_urls: $APPLE_CERTIFICATE_URL_LIST
-            - passphrases: $APPLE_CERTIFICATE_PASSHRASE_LIST
+            - certificate_urls: $IOS_APPLE_CERTIFICATE_URL_LIST
+            - passphrases: $IOS_APPLE_CERTIFICATE_PASSHRASE
       - generate-cordova-build-configuration:
           inputs:
             - configuration: release
