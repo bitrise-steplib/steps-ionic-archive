@@ -234,8 +234,20 @@ func main() {
 	}
 
 	fmt.Println()
-	if err := ionic.CordovaVersion(); err != nil {
+	cordovaVersion, err := ionic.CordovaVersion()
+	if err != nil {
 		fail("Failed to get cordova version, error: %s", err)
+	}
+
+	log.Printf("cordova version: %s", colorstring.Green(cordovaVersion.String()))
+	
+	minCordovaVersion, err := ver.NewVersion("8.1.0")
+	if err != nil {
+		fail("Failed to parse version 8.1.0: %s", err)
+	}
+	if cordovaVersion.LessThan(minCordovaVersion) {
+		log.Warnf("Cordova doesn't support exporting aab, falling back to apk")
+		isAAB = false
 	}
 
 	ionicVer, err := ionic.Version()
