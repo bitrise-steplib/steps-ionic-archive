@@ -343,7 +343,7 @@ func main() {
 			}
 
 			if platform == "android" && isAAB {
-				cmdArgs = append(cmdArgs, "--packageType=bundle")
+				cmdArgs = append(cmdArgs, "--", "--", "--packageType=bundle")
 			}
 
 			cmdArgs = append(cmdArgs, options...)
