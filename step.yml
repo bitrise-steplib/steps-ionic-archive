@@ -2,7 +2,7 @@ title: Ionic archive
 summary: Generates builds for the requested platforms.
 description: |-
   Generates an iOS, Android or an iOS and Android build based on your Step settings and a `build.json` file which is inherited from the **Generate cordova build configuration** Step.
- 
+
   ### Configuring the Step
   1. In the **Platform to use in ionic-cli commands** input, select the platform you wish to build for from the drop-down menu.
   2. In the **Build command configuration** input, select either `debug` or `release` mode from the drop-down menu. If you set `release` to generate a release build, then you should select `device` instead of `emulator` in the **Build command target**.
@@ -27,18 +27,18 @@ description: |-
   - [Generate Cordova Build Configuration](https://www.bitrise.io/integrations/steps/android-build)
   - [Run npm command](https://www.bitrise.io/integrations/steps/npm)
   - [Cordova Archive](https://www.bitrise.io/integrations/steps/cordova-archive)
-  
+
 website: https://github.com/bitrise-steplib/steps-ionic-archive
 source_code_url: https://github.com/bitrise-steplib/steps-ionic-archive
 support_url: https://github.com/bitrise-steplib/steps-ionic-archive/issues
 project_type_tags:
-- ionic
+  - ionic
 type_tags:
-- build
+  - build
 deps:
   brew:
-  - name: go
-  - name: gradle
+    - name: go
+    - name: gradle
 toolkit:
   go:
     package_name: github.com/bitrise-steplib/steps-ionic-archive
@@ -51,9 +51,9 @@ inputs:
 
         `ionic cordova build [OTHER_PARAMS] <platform>`
       value_options:
-      - "ios,android"
-      - "ios"
-      - "android"
+        - "ios,android"
+        - "ios"
+        - "android"
       is_required: true
   - configuration: release
     opts:
@@ -63,8 +63,8 @@ inputs:
 
         `ionic cordova build [OTHER_PARAMS] [--release | --debug]`
       value_options:
-      - release
-      - debug
+        - release
+        - debug
       is_required: true
   - target: device
     opts:
@@ -74,8 +74,8 @@ inputs:
 
         `ionic cordova build [OTHER_PARAMS] [--device | --emulator]`
       value_options:
-      - device
-      - emulator
+        - device
+        - emulator
       is_required: true
   - build_config: $BITRISE_CORDOVA_BUILD_CONFIGURATION
     opts:
@@ -107,7 +107,7 @@ inputs:
       description: |-
         Use `Ionic username` and `Ionic password` to login with ionic-cli.
       is_sensitive: true
-  - ionic_version: 
+  - ionic_version:
     opts:
       title: "Ionic version"
       description: |-
@@ -123,7 +123,7 @@ inputs:
 
         - false: `ionic cordova build`
         - true: `ionic cordova prepare --no-build` followed by `ionic cordova build`
-  - cordova_version: 
+  - cordova_version:
     opts:
       title: "Cordova version"
       description: |-
@@ -138,6 +138,18 @@ inputs:
       description: |-
         Root directory of your Ionic project, where your Ionic config.xml exists.
       is_required: true
+  - android_build_type: apk
+    opts:
+      category: Android
+      title: Android build type
+      summary: |
+        Set the build type that you want to build for your Android app.
+      description: |
+        Set the build type that you want to build for your Android app.
+      is_required: true
+      value_options:
+        - "apk"
+        - "aab"
   - cache_local_deps: "false"
     opts:
       category: Cache
@@ -148,8 +160,8 @@ inputs:
         `false`: Do not use cache.
       is_required: true
       value_options:
-      - "true"
-      - "false"
+        - "true"
+        - "false"
 outputs:
   - BITRISE_IPA_PATH:
     opts:
@@ -172,3 +184,18 @@ outputs:
   - BITRISE_APK_PATH_LIST: ""
     opts:
       title: The created android .apk file paths (separated via |)
+  - BITRISE_AAB_PATH:
+    opts:
+      title: "Path of the generated AAB"
+      summary: "Path of the generated (and copied) AAB."
+      description: |-
+        This output will include the path of the generated AAB.
+        If the build generates more than one AAB this output
+        will contain the last one's path.
+  - BITRISE_AAB_PATH_LIST:
+    opts:
+      title: "List of the generated AAB paths"
+      summary: "List of the generated (and copied) AAB paths."
+      description: |-
+        This output will include the paths of the generated AABs.
+        The paths are separated with `|` character, for example, `app--debug.aab|app-mips-debug.aab`

@@ -34,6 +34,8 @@ const (
 
 	apkPathEnvKey     = "BITRISE_APK_PATH"
 	apkPathListEnvKey = "BITRISE_APK_PATH_LIST"
+	aabPathEnvKey     = "BITRISE_AAB_PATH"
+	aabPathListEnvKey = "BITRISE_AAB_PATH_LIST"
 )
 
 type config struct {
@@ -52,6 +54,8 @@ type config struct {
 
 	WorkDir   string `env:"workdir,dir"`
 	DeployDir string `env:"BITRISE_DEPLOY_DIR"`
+
+	AndroidBuildType string `env:"android_build_type,opt[apk,aab]"`
 
 	UseCache bool `env:"cache_local_deps,opt[true,false]"`
 }
@@ -176,6 +180,8 @@ func main() {
 	}
 	fmt.Println()
 	stepconf.Print(configs)
+
+	isAAB := configs.AndroidBuildType == "aab"
 
 	// Change dir to working directory
 	workDir, err := pathutil.AbsPath(configs.WorkDir)
@@ -336,6 +342,10 @@ func main() {
 				cmdArgs = append(cmdArgs, "--buildConfig", configs.BuildConfig)
 			}
 
+			if platform == "android" && isAAB {
+				cmdArgs = append(cmdArgs, "-- -- --packageType=bundle")
+			}
+
 			cmdArgs = append(cmdArgs, options...)
 
 			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
@@ -432,35 +442,47 @@ func main() {
 		// ios output directory not exists and ios selected as platform
 	}
 
-	var apks []string
+	var distPkg []string
 	androidOutputDir := filepath.Join(workDir, "platforms", "android")
 	log.Debugf("Android output directory: %s", androidOutputDir)
+	ext := "apk"
+	if isAAB {
+		ext = "aab"
+	}
 	if exist, err := pathutil.IsDirExists(androidOutputDir); err != nil {
 		fail("Failed to check if dir (%s) exist, error: %s", androidOutputDir, err)
 	} else if exist {
 		fmt.Println()
 		log.Infof("Collecting android outputs")
 
-		apks, err = findArtifact(androidOutputDir, "apk", buildStart)
+		distPkg, err = findArtifact(androidOutputDir, ext, buildStart)
 		if err != nil {
-			fail("Failed to find apks in dir (%s), error: %s", androidOutputDir, err)
+			fail("Failed to find %ss in dir (%s), error: %s", ext, androidOutputDir, err)
 		}
 
-		if len(apks) > 0 {
-			if exportedPth, exportedPaths, err := moveAndExportOutputs(apks, configs.DeployDir, apkPathEnvKey, apkPathListEnvKey); err != nil {
+		if len(distPkg) > 0 {
+			pathEnvKey := apkPathEnvKey
+			if isAAB {
+				pathEnvKey = aabPathEnvKey
+			}
+			pathListEnvKey := apkPathListEnvKey
+			if isAAB {
+				pathListEnvKey = aabPathListEnvKey
+			}
+			if exportedPth, exportedPaths, err := moveAndExportOutputs(distPkg, configs.DeployDir, pathEnvKey, pathListEnvKey); err != nil {
 				fail("Failed to export apks, error: %s", err)
 			} else if exportedPth != "" {
-				log.Donef("The apk path is now available in the Environment Variable: %s (value: %s)", apkPathEnvKey, exportedPth)
+				log.Donef("The apk path is now available in the Environment Variable: %s (value: %s)", pathEnvKey, exportedPth)
 				if len(exportedPaths) > 0 {
-					log.Donef("The apk paths are now available in the Environment Variable: %s (value: %s)", apkPathListEnvKey, strings.Join(exportedPaths, "|"))
+					log.Donef("The apk paths are now available in the Environment Variable: %s (value: %s)", pathListEnvKey, strings.Join(exportedPaths, "|"))
 				}
 			}
 		}
 	}
 
 	// if android in platforms
-	if len(apks) == 0 && sliceutil.IsStringInSlice("android", platforms) {
-		fail("No apk generated")
+	if len(distPkg) == 0 && sliceutil.IsStringInSlice("android", platforms) {
+		fail("No %s generated", ext)
 	}
 	// if ios in platforms
 	if sliceutil.IsStringInSlice("ios", platforms) {
