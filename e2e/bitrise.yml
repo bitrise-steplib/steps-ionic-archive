@@ -17,6 +17,7 @@ workflows:
     steps:
       - ionic-prepare:
           inputs:
+            - workdir: $BITRISE_SOURCE_DIR/_tmp
             - platform: ios
             - ionic_version: latest
       - ios-auto-provision-appstoreconnect:
