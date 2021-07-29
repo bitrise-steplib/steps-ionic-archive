@@ -55,7 +55,7 @@ type config struct {
 	WorkDir   string `env:"workdir,dir"`
 	DeployDir string `env:"BITRISE_DEPLOY_DIR"`
 
-	AndroidBuildType string `env:"android_build_type,opt[apk,aab]"`
+	AndroidAppType string `env:"android_app_type,opt[apk,aab]"`
 
 	UseCache bool `env:"cache_local_deps,opt[true,false]"`
 }
@@ -181,7 +181,7 @@ func main() {
 	fmt.Println()
 	stepconf.Print(configs)
 
-	isAAB := configs.AndroidBuildType == "aab"
+	isAAB := configs.AndroidAppType == "aab"
 
 	// Change dir to working directory
 	workDir, err := pathutil.AbsPath(configs.WorkDir)

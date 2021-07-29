@@ -138,14 +138,14 @@ inputs:
       description: |-
         Root directory of your Ionic project, where your Ionic config.xml exists.
       is_required: true
-  - android_build_type: apk
+  - android_app_type: apk
     opts:
       category: Android
-      title: Android build type
+      title: Android app type
       summary: |
-        Set the build type that you want to build for your Android app.
+        Set the distribution type that you want to build for your Android app.
       description: |
-        Set the build type that you want to build for your Android app.
+        Set the distribution type that you want to build for your Android app.
       is_required: true
       value_options:
         - "apk"
