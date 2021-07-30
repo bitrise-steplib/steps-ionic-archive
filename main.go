@@ -240,14 +240,16 @@ func main() {
 	}
 
 	log.Printf("cordova version: %s", colorstring.Green(cordovaVersion.String()))
-	
-	minCordovaVersion, err := ver.NewVersion("8.1.0")
-	if err != nil {
-		fail("Failed to parse version 8.1.0: %s", err)
-	}
-	if cordovaVersion.LessThan(minCordovaVersion) {
-		log.Warnf("Cordova doesn't support exporting aab, falling back to apk")
-		isAAB = false
+
+	if isAAB {
+		minCordovaVersion, err := ver.NewVersion("8.1.0")
+		if err != nil {
+			fail("Failed to parse version 8.1.0: %s", err)
+		}
+		if cordovaVersion.LessThan(minCordovaVersion) {
+			log.Warnf("Cordova doesn't support exporting aab, falling back to apk")
+			isAAB = false
+		}
 	}
 
 	ionicVer, err := ionic.Version()
@@ -482,11 +484,11 @@ func main() {
 				pathListEnvKey = aabPathListEnvKey
 			}
 			if exportedPth, exportedPaths, err := moveAndExportOutputs(distPkg, configs.DeployDir, pathEnvKey, pathListEnvKey); err != nil {
-				fail("Failed to export apks, error: %s", err)
+				fail("Failed to export %ss, error: %s", ext, err)
 			} else if exportedPth != "" {
-				log.Donef("The apk path is now available in the Environment Variable: %s (value: %s)", pathEnvKey, exportedPth)
+				log.Donef("The %s path is now available in the Environment Variable: %s (value: %s)", ext, pathEnvKey, exportedPth)
 				if len(exportedPaths) > 0 {
-					log.Donef("The apk paths are now available in the Environment Variable: %s (value: %s)", pathListEnvKey, strings.Join(exportedPaths, "|"))
+					log.Donef("The %s paths are now available in the Environment Variable: %s (value: %s)", ext, pathListEnvKey, strings.Join(exportedPaths, "|"))
 				}
 			}
 		}
