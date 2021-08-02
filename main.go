@@ -512,6 +512,9 @@ func buildIonicCommandArgs(ionicMajorVersion int, configuration string, target s
 		cmdArgs = append(cmdArgs, "--buildConfig", buildConfig)
 	}
 
+	// Ionic CLI uses -- to indicate further parameters are passed to Cordova CLI
+	// Cordova CLI uses -- to indicate further parameters are platform arguments
+
 	groupArgs := map[int][]string{0: []string{}, 1: []string{}, 2: []string{}}
 
 	group := 0
