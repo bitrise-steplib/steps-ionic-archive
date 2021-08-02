@@ -325,7 +325,7 @@ func main() {
 	buildStart := time.Now()
 	{
 		// build
-		options := []string{}
+		var options []string
 		if configs.Options != "" {
 			opts, err := shellquote.Split(configs.Options)
 			if err != nil {
@@ -335,34 +335,9 @@ func main() {
 		}
 
 		for _, platform := range platforms {
-			cmdArgs := []string{"ionic"}
-			if ionicMajorVersion > 2 {
-				cmdArgs = append(cmdArgs, "cordova")
-			}
+			cmdArgs := buildIonicCommandArgs(ionicMajorVersion, configs.Configuration, configs.Target, configs.BuildConfig, platform, isAAB, options)
 
-			cmdArgs = append(cmdArgs, "build")
-
-			if configs.Configuration != "" {
-				cmdArgs = append(cmdArgs, "--"+configs.Configuration)
-			}
-
-			if configs.Target != "" {
-				cmdArgs = append(cmdArgs, "--"+configs.Target)
-			}
-
-			cmdArgs = append(cmdArgs, platform)
-
-			if configs.BuildConfig != "" {
-				cmdArgs = append(cmdArgs, "--buildConfig", configs.BuildConfig)
-			}
-
-			if platform == "android" && isAAB {
-				cmdArgs = append(cmdArgs, "--", "--", "--packageType=bundle")
-			}
-
-			cmdArgs = append(cmdArgs, options...)
-
-			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
+			cmd := command.New("ionic", cmdArgs...)
 			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))
 
 			log.Donef("$ %s", cmd.PrintableCommandArgs())
@@ -513,4 +488,59 @@ func main() {
 			log.Warnf("Failed to mark files for caching, error: %s", err)
 		}
 	}
+}
+
+func buildIonicCommandArgs(ionicMajorVersion int, configuration string, target string, buildConfig string, platform string, isAAB bool, options []string) []string {
+	var cmdArgs []string
+	if ionicMajorVersion > 2 {
+		cmdArgs = append(cmdArgs, "cordova")
+	}
+
+	cmdArgs = append(cmdArgs, "build")
+
+	if configuration != "" {
+		cmdArgs = append(cmdArgs, "--"+configuration)
+	}
+
+	if target != "" {
+		cmdArgs = append(cmdArgs, "--"+target)
+	}
+
+	cmdArgs = append(cmdArgs, platform)
+
+	if buildConfig != "" {
+		cmdArgs = append(cmdArgs, "--buildConfig", buildConfig)
+	}
+
+	groupArgs := map[int][]string{0: []string{}, 1: []string{}, 2: []string{}}
+
+	group := 0
+	for _, option := range options {
+		if option == "--" {
+			group++
+			continue
+		}
+		groupArgs[group] = append(groupArgs[group], option)
+	}
+
+	if platform == "android" && isAAB {
+		groupArgs[2] = append(groupArgs[2], "--packageType=bundle")
+	}
+
+	if len(groupArgs[0]) > 0 {
+		cmdArgs = append(cmdArgs, groupArgs[0]...)
+	}
+	if len(groupArgs[1]) > 0 {
+		cmdArgs = append(cmdArgs, "--")
+		cmdArgs = append(cmdArgs, groupArgs[1]...)
+	}
+	if len(groupArgs[2]) > 0 {
+		if len(groupArgs[1]) == 0 {
+			cmdArgs = append(cmdArgs, "--")
+		}
+		cmdArgs = append(cmdArgs, "--")
+		cmdArgs = append(cmdArgs, groupArgs[2]...)
+	}
+
+	return cmdArgs
 }
