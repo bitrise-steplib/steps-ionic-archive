@@ -34,6 +34,8 @@ const (
 
 	apkPathEnvKey     = "BITRISE_APK_PATH"
 	apkPathListEnvKey = "BITRISE_APK_PATH_LIST"
+	aabPathEnvKey     = "BITRISE_AAB_PATH"
+	aabPathListEnvKey = "BITRISE_AAB_PATH_LIST"
 )
 
 type config struct {
@@ -52,6 +54,8 @@ type config struct {
 
 	WorkDir   string `env:"workdir,dir"`
 	DeployDir string `env:"BITRISE_DEPLOY_DIR"`
+
+	AndroidAppType string `env:"android_app_type,opt[apk,aab]"`
 
 	UseCache bool `env:"cache_local_deps,opt[true,false]"`
 }
@@ -177,6 +181,8 @@ func main() {
 	fmt.Println()
 	stepconf.Print(configs)
 
+	isAAB := configs.AndroidAppType == "aab"
+
 	// Change dir to working directory
 	workDir, err := pathutil.AbsPath(configs.WorkDir)
 	if err != nil {
@@ -228,8 +234,22 @@ func main() {
 	}
 
 	fmt.Println()
-	if err := ionic.CordovaVersion(); err != nil {
+	cordovaVersion, err := ionic.CordovaVersion()
+	if err != nil {
 		fail("Failed to get cordova version, error: %s", err)
+	}
+
+	log.Printf("cordova version: %s", colorstring.Green(cordovaVersion.String()))
+
+	if isAAB {
+		minCordovaVersion, err := ver.NewVersion("8.1.0")
+		if err != nil {
+			fail("Failed to parse version 8.1.0: %s", err)
+		}
+		if cordovaVersion.LessThan(minCordovaVersion) {
+			log.Warnf("Cordova doesn't support exporting aab, falling back to apk")
+			isAAB = false
+		}
 	}
 
 	ionicVer, err := ionic.Version()
@@ -305,7 +325,7 @@ func main() {
 	buildStart := time.Now()
 	{
 		// build
-		options := []string{}
+		var options []string
 		if configs.Options != "" {
 			opts, err := shellquote.Split(configs.Options)
 			if err != nil {
@@ -315,30 +335,9 @@ func main() {
 		}
 
 		for _, platform := range platforms {
-			cmdArgs := []string{"ionic"}
-			if ionicMajorVersion > 2 {
-				cmdArgs = append(cmdArgs, "cordova")
-			}
+			cmdArgs := buildIonicCommandArgs(ionicMajorVersion, configs.Configuration, configs.Target, configs.BuildConfig, platform, isAAB, options)
 
-			cmdArgs = append(cmdArgs, "build")
-
-			if configs.Configuration != "" {
-				cmdArgs = append(cmdArgs, "--"+configs.Configuration)
-			}
-
-			if configs.Target != "" {
-				cmdArgs = append(cmdArgs, "--"+configs.Target)
-			}
-
-			cmdArgs = append(cmdArgs, platform)
-
-			if configs.BuildConfig != "" {
-				cmdArgs = append(cmdArgs, "--buildConfig", configs.BuildConfig)
-			}
-
-			cmdArgs = append(cmdArgs, options...)
-
-			cmd := command.New(cmdArgs[0], cmdArgs[1:]...)
+			cmd := command.New("ionic", cmdArgs...)
 			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr).SetStdin(strings.NewReader("y"))
 
 			log.Donef("$ %s", cmd.PrintableCommandArgs())
@@ -432,35 +431,47 @@ func main() {
 		// ios output directory not exists and ios selected as platform
 	}
 
-	var apks []string
+	var distPkg []string
 	androidOutputDir := filepath.Join(workDir, "platforms", "android")
 	log.Debugf("Android output directory: %s", androidOutputDir)
+	ext := "apk"
+	if isAAB {
+		ext = "aab"
+	}
 	if exist, err := pathutil.IsDirExists(androidOutputDir); err != nil {
 		fail("Failed to check if dir (%s) exist, error: %s", androidOutputDir, err)
 	} else if exist {
 		fmt.Println()
 		log.Infof("Collecting android outputs")
 
-		apks, err = findArtifact(androidOutputDir, "apk", buildStart)
+		distPkg, err = findArtifact(androidOutputDir, ext, buildStart)
 		if err != nil {
-			fail("Failed to find apks in dir (%s), error: %s", androidOutputDir, err)
+			fail("Failed to find %ss in dir (%s), error: %s", ext, androidOutputDir, err)
 		}
 
-		if len(apks) > 0 {
-			if exportedPth, exportedPaths, err := moveAndExportOutputs(apks, configs.DeployDir, apkPathEnvKey, apkPathListEnvKey); err != nil {
-				fail("Failed to export apks, error: %s", err)
+		if len(distPkg) > 0 {
+			pathEnvKey := apkPathEnvKey
+			if isAAB {
+				pathEnvKey = aabPathEnvKey
+			}
+			pathListEnvKey := apkPathListEnvKey
+			if isAAB {
+				pathListEnvKey = aabPathListEnvKey
+			}
+			if exportedPth, exportedPaths, err := moveAndExportOutputs(distPkg, configs.DeployDir, pathEnvKey, pathListEnvKey); err != nil {
+				fail("Failed to export %ss, error: %s", ext, err)
 			} else if exportedPth != "" {
-				log.Donef("The apk path is now available in the Environment Variable: %s (value: %s)", apkPathEnvKey, exportedPth)
+				log.Donef("The %s path is now available in the Environment Variable: %s (value: %s)", ext, pathEnvKey, exportedPth)
 				if len(exportedPaths) > 0 {
-					log.Donef("The apk paths are now available in the Environment Variable: %s (value: %s)", apkPathListEnvKey, strings.Join(exportedPaths, "|"))
+					log.Donef("The %s paths are now available in the Environment Variable: %s (value: %s)", ext, pathListEnvKey, strings.Join(exportedPaths, "|"))
 				}
 			}
 		}
 	}
 
 	// if android in platforms
-	if len(apks) == 0 && sliceutil.IsStringInSlice("android", platforms) {
-		fail("No apk generated")
+	if len(distPkg) == 0 && sliceutil.IsStringInSlice("android", platforms) {
+		fail("No %s generated", ext)
 	}
 	// if ios in platforms
 	if sliceutil.IsStringInSlice("ios", platforms) {
@@ -477,4 +488,62 @@ func main() {
 			log.Warnf("Failed to mark files for caching, error: %s", err)
 		}
 	}
+}
+
+func buildIonicCommandArgs(ionicMajorVersion int, configuration string, target string, buildConfig string, platform string, isAAB bool, options []string) []string {
+	var cmdArgs []string
+	if ionicMajorVersion > 2 {
+		cmdArgs = append(cmdArgs, "cordova")
+	}
+
+	cmdArgs = append(cmdArgs, "build")
+
+	if configuration != "" {
+		cmdArgs = append(cmdArgs, "--"+configuration)
+	}
+
+	if target != "" {
+		cmdArgs = append(cmdArgs, "--"+target)
+	}
+
+	cmdArgs = append(cmdArgs, platform)
+
+	if buildConfig != "" {
+		cmdArgs = append(cmdArgs, "--buildConfig", buildConfig)
+	}
+
+	// Ionic CLI uses -- to indicate further parameters are passed to Cordova CLI
+	// Cordova CLI uses -- to indicate further parameters are platform arguments
+
+	groupArgs := map[int][]string{0: []string{}, 1: []string{}, 2: []string{}}
+
+	group := 0
+	for _, option := range options {
+		if option == "--" {
+			group++
+			continue
+		}
+		groupArgs[group] = append(groupArgs[group], option)
+	}
+
+	if platform == "android" && isAAB {
+		groupArgs[2] = append(groupArgs[2], "--packageType=bundle")
+	}
+
+	if len(groupArgs[0]) > 0 {
+		cmdArgs = append(cmdArgs, groupArgs[0]...)
+	}
+	if len(groupArgs[1]) > 0 {
+		cmdArgs = append(cmdArgs, "--")
+		cmdArgs = append(cmdArgs, groupArgs[1]...)
+	}
+	if len(groupArgs[2]) > 0 {
+		if len(groupArgs[1]) == 0 {
+			cmdArgs = append(cmdArgs, "--")
+		}
+		cmdArgs = append(cmdArgs, "--")
+		cmdArgs = append(cmdArgs, groupArgs[2]...)
+	}
+
+	return cmdArgs
 }

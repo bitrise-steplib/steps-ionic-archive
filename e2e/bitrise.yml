@@ -1,0 +1,135 @@
+format_version: "11"
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+app:
+  envs:
+    # Shared test configs
+    - TEST_APP_URL: https://github.com/bitrise-io/ionic-conference-app.git
+    - TEST_APP_BRANCH: master
+    # Shared test secrets
+    - BITRISE_APPSTORECONNECT_API_KEY_URL: $BITRISE_APPSTORECONNECT_API_KEY_URL
+    - BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID: $BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID
+    - BITRISE_APPLE_APPLE_CERTIFICATE_URL_LIST: $BITRISE_APPLE_APPLE_CERTIFICATE_URL_LIST
+    - BITRISE_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST: $BITRISE_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST
+    - IONIC_USERNAME: $IONIC_USERNAME
+    - IONIC_PASSWORD: $IONIC_PASSWORD
+
+workflows:
+  test_ios_device_build:
+    envs:
+      - TARGET: device
+      - PLATFORM: ios
+    before_run:
+      - _setup
+      - _install_dependencies_with_npm
+    steps:
+      - ionic-prepare:
+          inputs:
+            - workdir: $BITRISE_SOURCE_DIR/_tmp
+            - platform: ios
+            - ionic_version: latest
+      - ios-auto-provision-appstoreconnect:
+          inputs:
+            - distribution_type: development
+            - project_path: $BITRISE_SOURCE_DIR/_tmp/platforms/ios/Ionic Conference App.xcworkspace
+            - scheme: Ionic Conference App
+            - connection: 'off'
+            - api_key_path: $BITRISE_APPSTORECONNECT_API_KEY_URL
+            - api_issuer: $BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID
+            - certificate_urls: $BITRISE_APPLE_APPLE_CERTIFICATE_URL_LIST
+            - passphrases: $BITRISE_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST
+      - generate-cordova-build-configuration:
+          inputs:
+            - configuration: release
+            - development_team: $BITRISE_DEVELOPER_TEAM
+            - code_sign_identity: $BITRISE_DEVELOPMENT_CODESIGN_IDENTITY
+            - provisioning_profile: $BITRISE_DEVELOPMENT_PROFILE
+            - package_type: $BITRISE_EXPORT_METHOD
+    after_run:
+      - _run
+
+  test_with_npm:
+    envs:
+      - TARGET: emulator
+      - PLATFORM: ios,android
+    before_run:
+      - _setup
+      - _install_dependencies_with_npm
+    after_run:
+      - _run
+
+  test_with_yarn:
+    envs:
+      - TARGET: emulator
+      - PLATFORM: ios,android
+    before_run:
+      - _setup
+      - _install_dependencies_with_yarn
+    after_run:
+      - _run
+
+  _run:
+    steps:
+      - path::./:
+          title: Step Test
+          inputs:
+            - target: $TARGET
+            - platform: ios,android
+            - ionic_version: latest
+            - cordova_version: latest
+            - ionic_username: $IONIC_USERNAME
+            - ionic_password: $IONIC_PASSWORD
+            - options: --verbose
+            - workdir: $BITRISE_SOURCE_DIR/_tmp
+
+  _setup:
+    steps:
+      - script:
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -ex
+                rm -rf $BITRISE_SOURCE_DIR/_tmp
+                mkdir $BITRISE_SOURCE_DIR/_tmp
+      - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone:
+          inputs:
+            - repository_url: $TEST_APP_URL
+            - branch: $TEST_APP_BRANCH
+            - clone_into_dir: $BITRISE_SOURCE_DIR/_tmp
+      - nvm@1:
+          inputs:
+            - node_version: '12'
+
+  _install_dependencies_with_npm:
+    steps:
+      - npm:
+          inputs:
+            - workdir: $BITRISE_SOURCE_DIR/_tmp
+            - command: install
+      - npm:
+          # Workaround for https://github.com/ionic-team/ionic-cli/issues/4262
+          inputs:
+            - workdir: $BITRISE_SOURCE_DIR/_tmp
+            - command: install "@angular-devkit/build-angular@~0.801.2"
+
+  _install_dependencies_with_yarn:
+    steps:
+      - yarn:
+          inputs:
+            - workdir: $BITRISE_SOURCE_DIR/_tmp
+            - command: import
+      - script:
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -ex
+                rm -rf _tmp/node_modules; rm _tmp/package-lock.json || true
+      - yarn:
+          inputs:
+            - workdir: $BITRISE_SOURCE_DIR/_tmp
+            - command: install
+      - yarn:
+          # Workaround for https://github.com/ionic-team/ionic-cli/issues/4262
+          inputs:
+            - workdir: $BITRISE_SOURCE_DIR/_tmp
+            - command: add "@angular-devkit/build-angular@~0.801.2"
