@@ -526,8 +526,12 @@ func buildIonicCommandArgs(ionicMajorVersion int, configuration string, target s
 		groupArgs[group] = append(groupArgs[group], option)
 	}
 
-	if platform == "android" && isAAB {
-		groupArgs[2] = append(groupArgs[2], "--packageType=bundle")
+	if (platform == "android") {
+		if (isAAB) {
+			groupArgs[2] = append(groupArgs[2], "--packageType=bundle")
+		} else {
+			groupArgs[2] = append(groupArgs[2], "--packageType=apk")
+		}
 	}
 
 	if len(groupArgs[0]) > 0 {
