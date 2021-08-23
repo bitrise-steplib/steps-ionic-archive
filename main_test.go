@@ -18,7 +18,7 @@ func Test_buildIonicCommandArgs(t *testing.T) {
 		{name: "NoOptions & NoAAB", args: args{
 			isAAB:   false,
 			options: nil,
-		}, want: []string{"cordova", "build", "--release", "--device", "android", "--buildConfig", "/foo/bar/baz/qux"}},
+		}, want: []string{"cordova", "build", "--release", "--device", "android", "--buildConfig", "/foo/bar/baz/qux", "--", "--", "--packageType=apk"}},
 		{name: "NoOptions & AAB", args: args{
 			isAAB:   true,
 			options: nil,
@@ -30,7 +30,7 @@ func Test_buildIonicCommandArgs(t *testing.T) {
 		{name: "SimpleOptions & NoAAB", args: args{
 			isAAB:   false,
 			options: []string{"foo", "bar"},
-		}, want: []string{"cordova", "build", "--release", "--device", "android", "--buildConfig", "/foo/bar/baz/qux", "foo", "bar"}},
+		}, want: []string{"cordova", "build", "--release", "--device", "android", "--buildConfig", "/foo/bar/baz/qux", "foo", "bar", "--", "--", "--packageType=apk"}},
 		{name: "SimpleOptions + Platform & AAB", args: args{
 			isAAB:   true,
 			options: []string{"foo", "bar", "--", "--", "--baz=qux"},
