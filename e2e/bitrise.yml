@@ -16,6 +16,16 @@ app:
 
 workflows:
   test_ios_device_build:
+    before_run:
+    - _check_xcode_available
+    steps:
+    - bitrise-run:
+        run_if: '{{enveq "XCODE_AVAILABLE" "true"}}'
+        inputs:
+        - workflow_id: utility_test_ios_device_build
+        - bitrise_config_path: ./e2e/bitrise.yml
+
+  utility_test_ios_device_build:
     envs:
       - TARGET: device
       - PLATFORM: ios
@@ -49,6 +59,16 @@ workflows:
       - _run
 
   test_with_npm:
+    before_run:
+    - _check_xcode_available
+    steps:
+    - bitrise-run:
+        run_if: '{{enveq "XCODE_AVAILABLE" "true"}}'
+        inputs:
+        - workflow_id: utility_test_with_npm
+        - bitrise_config_path: ./e2e/bitrise.yml
+
+  utility_test_with_npm:
     envs:
       - TARGET: emulator
       - PLATFORM: ios,android
@@ -59,6 +79,16 @@ workflows:
       - _run
 
   test_with_yarn:
+    before_run:
+    - _check_xcode_available
+    steps:
+    - bitrise-run:
+        run_if: '{{enveq "XCODE_AVAILABLE" "true"}}'
+        inputs:
+        - workflow_id: utility_test_with_yarn
+        - bitrise_config_path: ./e2e/bitrise.yml
+
+  utility_test_with_yarn:
     envs:
       - TARGET: emulator
       - PLATFORM: ios,android
@@ -74,7 +104,7 @@ workflows:
           title: Step Test
           inputs:
             - target: $TARGET
-            - platform: ios,android
+            - platform: $PLATFORM
             - ionic_version: latest
             - cordova_version: latest
             - ionic_username: $IONIC_USERNAME
@@ -133,3 +163,17 @@ workflows:
           inputs:
             - workdir: $BITRISE_SOURCE_DIR/_tmp
             - command: add "@angular-devkit/build-angular@~0.801.2"
+
+  _check_xcode_available:
+    steps:
+    - script:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -eo pipefail
+            if ! command -v xcodebuild &> /dev/null; then
+                 echo "Xcode is not available."
+                 envman add --key XCODE_AVAILABLE --value false
+                 exit 0
+            fi
+            envman add --key XCODE_AVAILABLE --value true
