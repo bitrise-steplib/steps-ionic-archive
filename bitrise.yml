@@ -4,37 +4,43 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 workflows:
   check:
     steps:
-      - git::https://github.com/bitrise-steplib/steps-check.git: { }
+    - git::https://github.com/bitrise-steplib/steps-check.git: { }
 
   e2e:
     steps:
-      - git::https://github.com/bitrise-steplib/steps-check.git:
-          inputs:
-            - workflow: e2e
+    - git::https://github.com/bitrise-steplib/steps-check.git:
+        inputs:
+        - workflow: e2e
 
   sample:
     steps:
-      - script:
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                set -ex
-                rm -rf $BITRISE_SOURCE_DIR/_tmp
-                mkdir $BITRISE_SOURCE_DIR/_tmp
-      - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone:
-          inputs:
-            - repository_url: https://github.com/bitrise-io/ionic-conference-app.git
-            - branch: master
-            - clone_into_dir: $BITRISE_SOURCE_DIR/_tmp
-      - nvm@1:
-          inputs:
-            - node_version: '12'
-      - path::./:
-          title: Step Test
-          inputs:
-            - target: emulator
-            - platform: ios,android
-            - ionic_version: latest
-            - cordova_version: latest
-            - options: --verbose
-            - workdir: $BITRISE_SOURCE_DIR/_tmp
+    - script:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+            rm -rf $BITRISE_SOURCE_DIR/_tmp
+            mkdir $BITRISE_SOURCE_DIR/_tmp
+    - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone:
+        inputs:
+        - repository_url: https://github.com/bitrise-io/ionic-conference-app.git
+        - branch: master
+        - clone_into_dir: $BITRISE_SOURCE_DIR/_tmp
+    - nvm@1:
+        inputs:
+        - node_version: '12'
+    - path::./:
+        title: Step Test
+        inputs:
+        - target: emulator
+        - platform: ios,android
+        - ionic_version: latest
+        - cordova_version: latest
+        - options: --verbose
+        - workdir: $BITRISE_SOURCE_DIR/_tmp
+
+  generate_readme:
+    steps:
+    - git::https://github.com/bitrise-steplib/steps-readme-generator.git@main:
+        inputs:
+        - contrib_section: docs/contribution.md
