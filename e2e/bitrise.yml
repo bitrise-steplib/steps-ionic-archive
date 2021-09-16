@@ -129,6 +129,9 @@ workflows:
       - nvm@1:
           inputs:
             - node_version: '12'
+      - set-java-version:
+          inputs:
+          - set_java_version: 8
 
   _install_dependencies_with_npm:
     steps:
