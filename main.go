@@ -427,9 +427,8 @@ func main() {
 			}
 		}
 		// ---
-	} else {
-		// ios output directory not exists and ios selected as platform
 	}
+	// else: ios output directory not exists and ios selected as platform
 
 	var distPkg []string
 	androidOutputDir := filepath.Join(workDir, "platforms", "android")
