@@ -47,6 +47,8 @@ workflows:
         - api_issuer: $BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID
         - verbose_log: "yes"
         - apple_team_id: 72SA8V3WYL
+        - passphrase_list: $BITRISE_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST
+        - certificate_url_list: $BITRISE_APPLE_APPLE_CERTIFICATE_URL_LIST
     - generate-cordova-build-configuration:
         inputs:
         - configuration: debug
