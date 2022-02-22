@@ -39,16 +39,16 @@ workflows:
         - workdir: $BITRISE_SOURCE_DIR/_tmp
         - platform: ios
         - ionic_version: latest
-    - ios-auto-provision-appstoreconnect:
-        inputs:
-        - distribution_type: development
-        - project_path: $BITRISE_SOURCE_DIR/_tmp/platforms/ios/Ionic Conference App.xcworkspace
-        - scheme: Ionic Conference App
-        - connection: "off"
-        - api_key_path: $BITRISE_APPSTORECONNECT_API_KEY_URL
-        - api_issuer: $BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID
-        - certificate_urls: $BITRISE_APPLE_APPLE_CERTIFICATE_URL_LIST
-        - passphrases: $BITRISE_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST
+    - manage-ios-code-signing:
+      inputs: 
+      - apple_service_connection: api-key
+      - distribution_method: development
+      - project_path: $BITRISE_SOURCE_DIR/_tmp/platforms/ios/Ionic Conference App.xcworkspace
+      - scheme: Ionic Conference App
+    # - api_key_path: $BITRISE_APPSTORECONNECT_API_KEY_URL
+        # - api_issuer: $BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID
+        # - certificate_urls: $BITRISE_APPLE_APPLE_CERTIFICATE_URL_LIST
+        # - passphrases: $BITRISE_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST
     - generate-cordova-build-configuration:
         inputs:
         - configuration: release
