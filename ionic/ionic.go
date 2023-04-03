@@ -18,7 +18,7 @@ func Version() (*ver.Version, error) {
 	cmd.SetStdin(strings.NewReader("Y"))
 	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s, output: %s", err, out)
 	}
 
 	// fix for ionic-cli intercative version output: `[1000D[K3.2.0`
@@ -49,7 +49,7 @@ func CordovaVersion() (*ver.Version, error) {
 	cmd := command.New("cordova", "-v")
 	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s, output: %s", err, out)
 	}
 	re := regexp.MustCompile(`(?:.*[^0-9])?([0-9]+\.[0-9]+\.[0-9]+)(?:[^0-9].*)?`)
 	matches := re.FindStringSubmatch(out)

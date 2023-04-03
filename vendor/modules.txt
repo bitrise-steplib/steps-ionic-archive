@@ -1,11 +1,11 @@
 # github.com/bitrise-io/go-steputils v0.0.0-20210527075147-910ce7a105a1
-## explicit
+## explicit; go 1.15
 github.com/bitrise-io/go-steputils/cache
 github.com/bitrise-io/go-steputils/jsdependency
 github.com/bitrise-io/go-steputils/stepconf
 github.com/bitrise-io/go-steputils/tools
 # github.com/bitrise-io/go-utils v0.0.0-20210713111255-08be784d45d0
-## explicit
+## explicit; go 1.13
 github.com/bitrise-io/go-utils/colorstring
 github.com/bitrise-io/go-utils/command
 github.com/bitrise-io/go-utils/errorutil
@@ -16,6 +16,7 @@ github.com/bitrise-io/go-utils/pointers
 github.com/bitrise-io/go-utils/sliceutil
 github.com/bitrise-io/go-utils/ziputil
 # github.com/davecgh/go-spew v1.1.1
+## explicit
 github.com/davecgh/go-spew/spew
 # github.com/hashicorp/go-version v1.3.0
 ## explicit
@@ -27,10 +28,12 @@ github.com/kballard/go-shellquote
 ## explicit
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
+## explicit
 github.com/pmezard/go-difflib/difflib
 # github.com/stretchr/testify v1.7.0
-## explicit
+## explicit; go 1.13
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
 # gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+## explicit
 gopkg.in/yaml.v3
