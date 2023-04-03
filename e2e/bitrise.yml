@@ -34,7 +34,7 @@ workflows:
     - _setup
     - _install_dependencies_with_npm
     steps:
-    - git::github.com/bitrise-steplib/steps-ionic-prepare@ofalvai/fix-ionic-version-cmd:
+    - git::https://github.com/bitrise-steplib/steps-ionic-prepare@ofalvai/fix-ionic-version-cmd:
         inputs:
         - workdir: $BITRISE_SOURCE_DIR/_tmp
         - platform: ios
