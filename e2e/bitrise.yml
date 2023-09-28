@@ -5,7 +5,9 @@ app:
   envs:
   # Shared test configs
   - TEST_APP_URL: https://github.com/bitrise-io/ionic-conference-app.git
-  - TEST_APP_BRANCH: master
+    # Bitrise Ionic steps don't support Capacitor yet, so we need to use the Cordova version of the app
+    # This is the last commit before the Capacitor migration:
+  - TEST_APP_COMMIT: 34d97d29369377a2f0173a2958de1ee0dadb8a6e
   # Shared test secrets
   - BITRISE_APPSTORECONNECT_API_KEY_URL: $BITRISE_APPSTORECONNECT_API_KEY_URL
   - BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID: $BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID
@@ -127,11 +129,21 @@ workflows:
     - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone:
         inputs:
         - repository_url: $TEST_APP_URL
-        - branch: $TEST_APP_BRANCH
+        - commit: $TEST_APP_COMMIT
         - clone_into_dir: $BITRISE_SOURCE_DIR/_tmp
     - nvm@1:
         inputs:
         - node_version: 12
+    - script:
+        title: Patch sample app
+        inputs:
+        - content: |-
+            set -exo pipefail
+
+            # https://ionic.io/blog/updates-to-ionic-angular-toolkit
+            npm install @ionic/cordova-builders --legacy-peer-deps
+            sed -i '' 's/@ionic\/angular-toolkit:cordova-build/@ionic\/cordova-builders:cordova-build/g' angular.json
+            sed -i '' 's/@ionic\/angular-toolkit:cordova-serve/@ionic\/cordova-builders:cordova-serve/g' angular.json
     - set-java-version:
         inputs:
         - set_java_version: 8
