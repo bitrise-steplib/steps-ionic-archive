@@ -142,8 +142,8 @@ workflows:
 
             # https://ionic.io/blog/updates-to-ionic-angular-toolkit
             npm install @ionic/cordova-builders --legacy-peer-deps
-            sed -i '' 's/@ionic\/angular-toolkit:cordova-build/@ionic\/cordova-builders:cordova-build/g' $BITRISE_SOURCE_DIR/_tmp
-            sed -i '' 's/@ionic\/angular-toolkit:cordova-serve/@ionic\/cordova-builders:cordova-serve/g' $BITRISE_SOURCE_DIR/_tmp
+            sed -i '' 's/@ionic\/angular-toolkit:cordova-build/@ionic\/cordova-builders:cordova-build/g' $BITRISE_SOURCE_DIR/_tmp/angular.json
+            sed -i '' 's/@ionic\/angular-toolkit:cordova-serve/@ionic\/cordova-builders:cordova-serve/g' $BITRISE_SOURCE_DIR/_tmp/angular.json
     - set-java-version:
         inputs:
         - set_java_version: 8
