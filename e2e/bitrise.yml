@@ -41,6 +41,7 @@ workflows:
         - workdir: $BITRISE_SOURCE_DIR/_tmp
         - platform: ios
         - ionic_version: latest
+        - cordova_version: latest
     - ios-auto-provision-appstoreconnect:
         inputs:
         - distribution_type: development
@@ -153,7 +154,7 @@ workflows:
     - npm:
         inputs:
         - workdir: $BITRISE_SOURCE_DIR/_tmp
-        - command: install
+        - command: ci --legacy-peer-deps
     - npm:
         # Workaround for https://github.com/ionic-team/ionic-cli/issues/4262
         inputs:
