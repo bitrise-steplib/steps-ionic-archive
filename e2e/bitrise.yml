@@ -54,7 +54,7 @@ workflows:
         - apple_team_id: $BITRISE_APPLE_TEAM_ID
         - api_key_path: $BITRISE_APPSTORECONNECT_API_KEY_URL
         - api_key_id: $BITRISE_APPSTORECONNECT_API_KEY_ID
-        - api_issuer_id: $BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID
+        - api_key_issuer_id: $BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID
         - verbose_log: "yes"
     - generate-cordova-build-configuration:
         inputs:
