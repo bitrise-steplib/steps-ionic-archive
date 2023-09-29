@@ -134,7 +134,7 @@ workflows:
         - clone_into_dir: $BITRISE_SOURCE_DIR/_tmp
     - nvm@1:
         inputs:
-        - node_version: 12
+        - node_version: 18
     - script:
         title: Patch sample app
         inputs:
