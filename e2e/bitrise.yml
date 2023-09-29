@@ -146,6 +146,7 @@ workflows:
             sed -i '' 's/@ionic\/angular-toolkit:cordova-build/@ionic\/cordova-builders:cordova-build/g' $BITRISE_SOURCE_DIR/_tmp/angular.json
             sed -i '' 's/@ionic\/angular-toolkit:cordova-serve/@ionic\/cordova-builders:cordova-serve/g' $BITRISE_SOURCE_DIR/_tmp/angular.json
     - set-java-version:
+        run_if: "{{ .IsCI }}"
         inputs:
         - set_java_version: 8
 
@@ -155,11 +156,6 @@ workflows:
         inputs:
         - workdir: $BITRISE_SOURCE_DIR/_tmp
         - command: ci --legacy-peer-deps
-    - npm:
-        # Workaround for https://github.com/ionic-team/ionic-cli/issues/4262
-        inputs:
-        - workdir: $BITRISE_SOURCE_DIR/_tmp
-        - command: install "@angular-devkit/build-angular@~0.801.2"
 
   _install_dependencies_with_yarn:
     steps:
@@ -177,11 +173,6 @@ workflows:
         inputs:
         - workdir: $BITRISE_SOURCE_DIR/_tmp
         - command: install
-    - yarn:
-        # Workaround for https://github.com/ionic-team/ionic-cli/issues/4262
-        inputs:
-        - workdir: $BITRISE_SOURCE_DIR/_tmp
-        - command: add "@angular-devkit/build-angular@~0.801.2"
 
   _check_xcode_available:
     steps:
