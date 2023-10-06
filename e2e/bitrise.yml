@@ -60,7 +60,8 @@ workflows:
         inputs:
         - configuration: release
         - development_team: $BITRISE_DEVELOPER_TEAM
-        - code_sign_identity: $BITRISE_DEVELOPMENT_CODESIGN_IDENTITY
+        # Hardcode the cert to avoid choosing a Mac installer cert, which is the first in the list
+        - code_sign_identity: "Apple Development: Tooling Bot Bitrise (TAZPAZQFT8)"
         - provisioning_profile: $BITRISE_DEVELOPMENT_PROFILE
         - package_type: $BITRISE_EXPORT_METHOD
     after_run:
