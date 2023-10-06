@@ -117,6 +117,8 @@ workflows:
         inputs:
         - target: $TARGET
         - platform: $PLATFORM
+        - options: |
+            -- --buildFlag="-destination platform=iOS Simulator,OS=latest,name=Bitrise iOS default"
         - ionic_version: latest
         - cordova_version: latest
         - ionic_username: $IONIC_USERNAME
