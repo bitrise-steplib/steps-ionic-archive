@@ -12,8 +12,8 @@ app:
   - BITRISE_APPSTORECONNECT_API_KEY_URL: $BITRISE_APPSTORECONNECT_API_KEY_URL
   - BITRISE_APPSTORECONNECT_API_KEY_ID: $BITRISE_APPSTORECONNECT_API_KEY_ID
   - BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID: $BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID
-  - BITRISE_APPLE_APPLE_CERTIFICATE_URL_LIST: $BITRISE_APPLE_APPLE_CERTIFICATE_URL_LIST
-  - BITRISE_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST: $BITRISE_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST
+  - BITRISE_APPLE_IOS_CERTIFICATE_URL_LIST: $BITRISE_APPLE_IOS_CERTIFICATE_URL_LIST
+  - BITRISE_APPLE_IOS_CERTIFICATE_PASSPHRASE_LIST: $BITRISE_APPLE_IOS_CERTIFICATE_PASSPHRASE_LIST
   - BITRISE_APPLE_TEAM_ID: $BITRISE_APPLE_TEAM_ID
   - IONIC_USERNAME: $IONIC_USERNAME
   - IONIC_PASSWORD: $IONIC_PASSWORD
@@ -49,8 +49,8 @@ workflows:
         - distribution_method: development
         - project_path: $BITRISE_SOURCE_DIR/_tmp/platforms/ios/Ionic Conference App.xcworkspace
         - scheme: Ionic Conference App
-        - certificate_url_list: $BITRISE_APPLE_APPLE_CERTIFICATE_URL_LIST
-        - passphrase_list: $BITRISE_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST
+        - certificate_url_list: $BITRISE_APPLE_IOS_CERTIFICATE_URL_LIST
+        - passphrase_list: $BITRISE_APPLE_IOS_CERTIFICATE_PASSPHRASE_LIST
         - apple_team_id: $BITRISE_APPLE_TEAM_ID
         - api_key_path: $BITRISE_APPSTORECONNECT_API_KEY_URL
         - api_key_id: $BITRISE_APPSTORECONNECT_API_KEY_ID
@@ -60,8 +60,7 @@ workflows:
         inputs:
         - configuration: release
         - development_team: $BITRISE_DEVELOPER_TEAM
-        # Hardcode the cert to avoid choosing a Mac installer cert, which is the first in the list
-        - code_sign_identity: "Apple Development: Tooling Bot Bitrise (TAZPAZQFT8)"
+        - code_sign_identity: $BITRISE_DEVELOPMENT_CODESIGN_IDENTITY
         - provisioning_profile: $BITRISE_DEVELOPMENT_PROFILE
         - package_type: $BITRISE_EXPORT_METHOD
     after_run:
