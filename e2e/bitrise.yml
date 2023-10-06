@@ -144,6 +144,15 @@ workflows:
         run_if: "{{ .IsCI }}"
         inputs:
         - set_java_version: 8
+    - script:
+        title: Create Cordova default iOS simulator device
+        run_if: |-
+          {{ enveq "XCODE_AVAILABLE" "true" }}
+        inputs:
+        - content: |-
+            set -ex
+            # OS version is omitted, uses the latest available
+            xcrun simctl create "iPhone 14 Pro Max" "iPhone 14 Pro Max"
 
   _install_dependencies_with_npm:
     steps:
