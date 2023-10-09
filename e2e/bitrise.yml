@@ -36,6 +36,7 @@ workflows:
     envs:
     - TARGET: device
     - PLATFORM: ios
+    - CONFIGURATION: release
     before_run:
     - _setup
     - _install_dependencies_with_npm
@@ -83,6 +84,7 @@ workflows:
     envs:
     - TARGET: emulator
     - PLATFORM: ios,android
+    - CONFIGURATION: debug
     - OPTIONS: |-
         -- --buildFlag="-destination platform=iOS Simulator,OS=latest,name=Bitrise iOS default"
     before_run:
@@ -106,6 +108,7 @@ workflows:
     envs:
     - TARGET: emulator
     - PLATFORM: ios,android
+    - CONFIGURATION: debug
     - OPTIONS: |-
         -- --buildFlag="-destination platform=iOS Simulator,OS=latest,name=Bitrise iOS default"
     before_run:
@@ -121,7 +124,7 @@ workflows:
         inputs:
         - target: $TARGET
         - platform: $PLATFORM
-        - configuration: debug
+        - configuration: $CONFIGURATION
         - options: $OPTIONS
         - ionic_version: latest
         - cordova_version: latest
