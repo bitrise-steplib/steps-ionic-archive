@@ -83,7 +83,7 @@ workflows:
     envs:
     - TARGET: emulator
     - PLATFORM: ios,android
-    - OPTIONS: |
+    - OPTIONS: |-
         -- --buildFlag="-destination platform=iOS Simulator,OS=latest,name=Bitrise iOS default"
     before_run:
     - _setup
@@ -106,7 +106,7 @@ workflows:
     envs:
     - TARGET: emulator
     - PLATFORM: ios,android
-    - OPTIONS: |
+    - OPTIONS: |-
         -- --buildFlag="-destination platform=iOS Simulator,OS=latest,name=Bitrise iOS default"
     before_run:
     - _setup
@@ -121,6 +121,7 @@ workflows:
         inputs:
         - target: $TARGET
         - platform: $PLATFORM
+        - configuration: debug
         - options: $OPTIONS
         - ionic_version: latest
         - cordova_version: latest
@@ -149,15 +150,6 @@ workflows:
         run_if: "{{ .IsCI }}"
         inputs:
         - set_java_version: 8
-    - script:
-        title: Create Cordova default iOS simulator device
-        run_if: |-
-          {{ enveq "XCODE_AVAILABLE" "true" }}
-        inputs:
-        - content: |-
-            set -ex
-            # OS version is omitted, uses the latest available
-            xcrun simctl create "iPhone 14 Pro Max" "iPhone 14 Pro Max"
 
   _install_dependencies_with_npm:
     steps:
