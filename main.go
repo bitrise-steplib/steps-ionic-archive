@@ -351,7 +351,8 @@ func main() {
 	// collect outputs
 
 	var ipas, dsyms, apps []string
-	iosOutputDir := filepath.Join(workDir, "platforms", "ios", "build", configs.Target)
+	targetComponent := ionic.FindIosTargetPathComponent(configs.Target, configs.Configuration, cordovaVersion.Original())
+	iosOutputDir := filepath.Join(workDir, "platforms", "ios", "build", targetComponent)
 	log.Debugf("iOS output directory: %s", iosOutputDir)
 	if exist, err := pathutil.IsDirExists(iosOutputDir); err != nil {
 		fail("Failed to check if dir (%s) exist, error: %s", iosOutputDir, err)

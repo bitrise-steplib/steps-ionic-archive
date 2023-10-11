@@ -94,3 +94,49 @@ func Test_PackageNameFromVersion(t *testing.T) {
 		})
 	}
 }
+
+func TestFindIosTargetPathComponent(t *testing.T) {
+    testCases := []struct {
+        name           string
+        target         string
+        configuration  string
+        cordovaVersion string
+        want           string
+    }{
+        {
+            name:           "Device + debug",
+            target:         "device",
+            configuration:  "debug",
+            cordovaVersion: "7.1.0",
+            want:           "Debug-iphoneos",
+        },
+        {
+            name:           "Emulator + release",
+            target:         "emulator",
+            configuration:  "release",
+            cordovaVersion: "99.99.99",
+            want:           "Release-iphonesimulator",
+        },
+        {
+            name:           "Device + release + old Cordova behavior",
+            target:         "device",
+            configuration:  "release",
+            cordovaVersion: "6.5.0",
+            want:           "device",
+        },
+        {
+            name:           "Emulator + debug + old Cordova behavior",
+            target:         "emulator",
+            configuration:  "debug",
+            cordovaVersion: "4.0.0",
+            want:           "emulator",
+        },
+    }
+
+    for _, tc := range testCases {
+        t.Run(tc.name, func(t *testing.T) {
+            got := FindIosTargetPathComponent(tc.target, tc.configuration, tc.cordovaVersion)
+            require.Equal(t, tc.want, got)
+        })
+    }
+}
