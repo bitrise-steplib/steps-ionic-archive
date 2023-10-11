@@ -5,12 +5,18 @@ app:
   envs:
   # Shared test configs
   - TEST_APP_URL: https://github.com/bitrise-io/ionic-conference-app.git
-  - TEST_APP_BRANCH: master
+    # Bitrise Ionic steps don't support Capacitor yet, so we need to use the Cordova version of the app
+    # This is branch is based on the last commit before the Capacitor migration:
+  - TEST_APP_BRANCH: pre-capacitor
   # Shared test secrets
   - BITRISE_APPSTORECONNECT_API_KEY_URL: $BITRISE_APPSTORECONNECT_API_KEY_URL
+  - BITRISE_APPSTORECONNECT_API_KEY_ID: $BITRISE_APPSTORECONNECT_API_KEY_ID
   - BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID: $BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID
-  - BITRISE_APPLE_APPLE_CERTIFICATE_URL_LIST: $BITRISE_APPLE_APPLE_CERTIFICATE_URL_LIST
-  - BITRISE_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST: $BITRISE_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST
+  # Excluding the Mac certificates because the `manage-ios-code-signing` step handles them incorrectly and
+  # would sometimes set a Mac certificate for this iOS sample app
+  - BITRISE_APPLE_APPLE_NOMAC_CERTIFICATE_URL_LIST: $BITRISE_APPLE_APPLE_NOMAC_CERTIFICATE_URL_LIST
+  - BITRISE_APPLE_APPLE_NOMAC_CERTIFICATE_PASSPHRASE_LIST: $BITRISE_APPLE_APPLE_NOMAC_CERTIFICATE_PASSPHRASE_LIST
+  - BITRISE_APPLE_TEAM_ID: $BITRISE_APPLE_TEAM_ID
   - IONIC_USERNAME: $IONIC_USERNAME
   - IONIC_PASSWORD: $IONIC_PASSWORD
 
@@ -30,6 +36,7 @@ workflows:
     envs:
     - TARGET: device
     - PLATFORM: ios
+    - CONFIGURATION: release
     before_run:
     - _setup
     - _install_dependencies_with_npm
@@ -39,16 +46,19 @@ workflows:
         - workdir: $BITRISE_SOURCE_DIR/_tmp
         - platform: ios
         - ionic_version: latest
-    - ios-auto-provision-appstoreconnect:
+        - cordova_version: latest
+    - manage-ios-code-signing@2:
         inputs:
-        - distribution_type: development
+        - distribution_method: development
         - project_path: $BITRISE_SOURCE_DIR/_tmp/platforms/ios/Ionic Conference App.xcworkspace
         - scheme: Ionic Conference App
-        - connection: "off"
+        - certificate_url_list: $BITRISE_APPLE_APPLE_NOMAC_CERTIFICATE_URL_LIST
+        - passphrase_list: $BITRISE_APPLE_APPLE_NOMAC_CERTIFICATE_PASSPHRASE_LIST
+        - apple_team_id: $BITRISE_APPLE_TEAM_ID
         - api_key_path: $BITRISE_APPSTORECONNECT_API_KEY_URL
-        - api_issuer: $BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID
-        - certificate_urls: $BITRISE_APPLE_APPLE_CERTIFICATE_URL_LIST
-        - passphrases: $BITRISE_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST
+        - api_key_id: $BITRISE_APPSTORECONNECT_API_KEY_ID
+        - api_key_issuer_id: $BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID
+        - verbose_log: "yes"
     - generate-cordova-build-configuration:
         inputs:
         - configuration: release
@@ -74,6 +84,9 @@ workflows:
     envs:
     - TARGET: emulator
     - PLATFORM: ios,android
+    - CONFIGURATION: debug
+    - OPTIONS: |-
+        -- --buildFlag="-destination platform=iOS Simulator,OS=latest,name=iPhone 11"
     before_run:
     - _setup
     - _install_dependencies_with_npm
@@ -95,6 +108,9 @@ workflows:
     envs:
     - TARGET: emulator
     - PLATFORM: ios,android
+    - CONFIGURATION: debug
+    - OPTIONS: |-
+        -- --buildFlag="-destination platform=iOS Simulator,OS=latest,name=iPhone 11"
     before_run:
     - _setup
     - _install_dependencies_with_yarn
@@ -108,11 +124,12 @@ workflows:
         inputs:
         - target: $TARGET
         - platform: $PLATFORM
+        - configuration: $CONFIGURATION
+        - options: $OPTIONS
         - ionic_version: latest
         - cordova_version: latest
         - ionic_username: $IONIC_USERNAME
         - ionic_password: $IONIC_PASSWORD
-        - options: --verbose
         - workdir: $BITRISE_SOURCE_DIR/_tmp
 
   _setup:
@@ -131,8 +148,9 @@ workflows:
         - clone_into_dir: $BITRISE_SOURCE_DIR/_tmp
     - nvm@1:
         inputs:
-        - node_version: 12
+        - node_version: 18
     - set-java-version:
+        run_if: "{{ .IsCI }}"
         inputs:
         - set_java_version: 8
 
@@ -141,12 +159,7 @@ workflows:
     - npm:
         inputs:
         - workdir: $BITRISE_SOURCE_DIR/_tmp
-        - command: install
-    - npm:
-        # Workaround for https://github.com/ionic-team/ionic-cli/issues/4262
-        inputs:
-        - workdir: $BITRISE_SOURCE_DIR/_tmp
-        - command: install "@angular-devkit/build-angular@~0.801.2"
+        - command: ci
 
   _install_dependencies_with_yarn:
     steps:
@@ -164,11 +177,6 @@ workflows:
         inputs:
         - workdir: $BITRISE_SOURCE_DIR/_tmp
         - command: install
-    - yarn:
-        # Workaround for https://github.com/ionic-team/ionic-cli/issues/4262
-        inputs:
-        - workdir: $BITRISE_SOURCE_DIR/_tmp
-        - command: add "@angular-devkit/build-angular@~0.801.2"
 
   _check_xcode_available:
     steps:
