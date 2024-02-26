@@ -48,8 +48,8 @@ workflows:
     - manage-ios-code-signing@2:
         inputs:
         - distribution_method: development
-        - project_path: $BITRISE_SOURCE_DIR/_tmp/platforms/ios/Ionic Conference App.xcworkspace
-        - scheme: Ionic Conference App
+        - project_path: $BITRISE_SOURCE_DIR/_tmp/platforms/ios/bitrise-cordova.xcworkspace
+        - scheme: bitrise-cordova
         - certificate_url_list: $BITRISE_APPLE_APPLE_NOMAC_CERTIFICATE_URL_LIST
         - passphrase_list: $BITRISE_APPLE_APPLE_NOMAC_CERTIFICATE_PASSPHRASE_LIST
         - apple_team_id: $BITRISE_APPLE_TEAM_ID
