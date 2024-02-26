@@ -3,6 +3,7 @@ package ionic
 import (
 	"testing"
 
+	ver "github.com/hashicorp/go-version"
 	"github.com/stretchr/testify/require"
 )
 
@@ -135,7 +136,8 @@ func TestFindIosTargetPathComponent(t *testing.T) {
 
     for _, tc := range testCases {
         t.Run(tc.name, func(t *testing.T) {
-            got := FindIosTargetPathComponent(tc.target, tc.configuration, tc.cordovaVersion)
+			cordovaVersion := ver.Must(ver.NewVersion(tc.cordovaVersion))
+            got := FindIosTargetPathComponent(tc.target, tc.configuration, cordovaVersion)
             require.Equal(t, tc.want, got)
         })
     }
