@@ -4,10 +4,8 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 app:
   envs:
   # Shared test configs
-  - TEST_APP_URL: https://github.com/bitrise-io/ionic-conference-app.git
-    # Bitrise Ionic steps don't support Capacitor yet, so we need to use the Cordova version of the app
-    # This is branch is based on the last commit before the Capacitor migration:
-  - TEST_APP_BRANCH: pre-capacitor
+  - TEST_APP_URL: https://github.com/bitrise-io/Bitrise-Ionic-Sample.git
+  - TEST_APP_BRANCH: main
   # Shared test secrets
   - BITRISE_APPSTORECONNECT_API_KEY_URL: $BITRISE_APPSTORECONNECT_API_KEY_URL
   - BITRISE_APPSTORECONNECT_API_KEY_ID: $BITRISE_APPSTORECONNECT_API_KEY_ID
