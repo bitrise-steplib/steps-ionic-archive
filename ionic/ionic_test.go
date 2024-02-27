@@ -3,6 +3,7 @@ package ionic
 import (
 	"testing"
 
+	ver "github.com/hashicorp/go-version"
 	"github.com/stretchr/testify/require"
 )
 
@@ -93,4 +94,51 @@ func Test_PackageNameFromVersion(t *testing.T) {
 			require.Equal(t, tt.want, got, "majorVersion() return value")
 		})
 	}
+}
+
+func TestFindIosTargetPathComponent(t *testing.T) {
+    testCases := []struct {
+        name           string
+        target         string
+        configuration  string
+        cordovaVersion string
+        want           string
+    }{
+        {
+            name:           "Device + debug",
+            target:         "device",
+            configuration:  "debug",
+            cordovaVersion: "7.1.0",
+            want:           "Debug-iphoneos",
+        },
+        {
+            name:           "Emulator + release",
+            target:         "emulator",
+            configuration:  "release",
+            cordovaVersion: "99.99.99",
+            want:           "Release-iphonesimulator",
+        },
+        {
+            name:           "Device + release + old Cordova behavior",
+            target:         "device",
+            configuration:  "release",
+            cordovaVersion: "6.5.0",
+            want:           "device",
+        },
+        {
+            name:           "Emulator + debug + old Cordova behavior",
+            target:         "emulator",
+            configuration:  "debug",
+            cordovaVersion: "4.0.0",
+            want:           "emulator",
+        },
+    }
+
+    for _, tc := range testCases {
+        t.Run(tc.name, func(t *testing.T) {
+			cordovaVersion := ver.Must(ver.NewVersion(tc.cordovaVersion))
+            got := FindIosTargetPathComponent(tc.target, tc.configuration, cordovaVersion)
+            require.Equal(t, tc.want, got)
+        })
+    }
 }

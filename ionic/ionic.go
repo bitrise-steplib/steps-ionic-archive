@@ -120,3 +120,21 @@ func parseMajorVersion(version string) (uint64, error) {
 
 	return majorVersion, nil
 }
+
+func FindIosTargetPathComponent(target string, configuration string, cordovaVersion *ver.Version) string {
+	if cordovaVersion == nil {
+		return target
+	}
+
+	if cordovaVersion.LessThan(ver.Must(ver.NewVersion("7.0.0"))) {
+		// Pre-Cordova-7 behavior: path segment is just "device" or "emulator"
+		return target
+	}
+
+	targetPlatform := "iphonesimulator"
+	if target == "device" {
+		targetPlatform = "iphoneos"
+	}
+
+	return strings.Title(configuration) + "-" + targetPlatform
+}
