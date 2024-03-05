@@ -3,6 +3,7 @@ package ionic
 import (
 	"bufio"
 	"fmt"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -121,20 +122,16 @@ func parseMajorVersion(version string) (uint64, error) {
 	return majorVersion, nil
 }
 
-func FindIosTargetPathComponent(target string, configuration string, cordovaVersion *ver.Version) string {
-	if cordovaVersion == nil {
-		return target
-	}
-
-	if cordovaVersion.LessThan(ver.Must(ver.NewVersion("7.0.0"))) {
-		// Pre-Cordova-7 behavior: path segment is just "device" or "emulator"
-		return target
-	}
-
+func FindIosTargetPathComponent(workDir string, target string, configuration string) []string {
 	targetPlatform := "iphonesimulator"
 	if target == "device" {
 		targetPlatform = "iphoneos"
 	}
 
-	return strings.Title(configuration) + "-" + targetPlatform
+	cordovaIOS7targetComponent := strings.Title(configuration) + "-" + targetPlatform
+
+	return []string{
+		filepath.Join(workDir, "platforms", "ios", "build", target),                     // cordova-ios <7
+		filepath.Join(workDir, "platforms", "ios", "build", cordovaIOS7targetComponent), // cordova-ios =>7
+	}
 }
