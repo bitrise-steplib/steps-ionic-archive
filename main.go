@@ -349,12 +349,11 @@ func main() {
 	}
 
 	// collect outputs
-
 	var ipas, dsyms, apps []string
-	iosOutputDirs := ionic.FindIosTargetPathComponent(workDir, configs.Target, configs.Configuration)
 
+	iosOutputDirs := getIosOutputCandidateDirsPaths(workDir, configs.Target, configs.Configuration)
 	log.Debugf("iOS output directory candidates: %s", iosOutputDirs)
-	iosOutputDir := getIOSOutoutDirPath(iosOutputDirs)
+	iosOutputDir := findFirstExistingDir(iosOutputDirs)
 
 	if iosOutputDir != "" {
 		log.Donef("\n\nIOS output dir exists!\n\n")
