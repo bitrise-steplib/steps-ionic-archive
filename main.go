@@ -351,16 +351,12 @@ func main() {
 	// collect outputs
 	var ipas, dsyms, apps []string
 
-	iosOutputDirs := getIosOutputCandidateDirsPaths(workDir, configs.Target, configs.Configuration)
-	log.Debugf("iOS output directory candidates: %s", iosOutputDirs)
-	iosOutputDir := findFirstExistingDir(iosOutputDirs)
-
+	iosOutputDir := findFirstExistingDir(getIosOutputCandidateDirsPaths(workDir, configs.Target, configs.Configuration))
 	if iosOutputDir != "" {
 		log.Donef("\n\nIOS output dir exists!\n\n")
-		log.Debugf("iOS output directory: %s", iosOutputDir)
 
 		fmt.Println()
-		log.Infof("Collecting ios outputs")
+		log.Infof("Collecting ios outputs from %s", iosOutputDir)
 
 		// ipa
 		ipas, err = findArtifact(iosOutputDir, "ipa", buildStart)
