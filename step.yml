@@ -46,6 +46,7 @@ inputs:
 - platform: ios,android
   opts:
     title: Platform to use in ionic-cli commands
+    summary: Specify this input to apply ionic-cli commands to desired platforms only.
     description: |-
       Specify this input to apply ionic-cli commands to desired platforms only.
 
@@ -58,6 +59,7 @@ inputs:
 - configuration: release
   opts:
     title: Build command configuration
+    summary: Specify build command configuration.
     description: |-
       Specify build command configuration.
 
@@ -69,6 +71,7 @@ inputs:
 - target: device
   opts:
     title: Build command target
+    summary: Specify build command target.
     description: |-
       Specify build command target.
 
@@ -80,11 +83,13 @@ inputs:
 - build_config: $BITRISE_CORDOVA_BUILD_CONFIGURATION
   opts:
     title: Build configuration path, to describe code signing properties
+    summary: Path to the build configuration file (build.json).
     description: |-
       Path to the build configuration file (build.json), which describes code signing properties.
 - options:
   opts:
     title: Options to append to the ionic-cli build command
+    summary: Custom options to append to the ionic-cli build command.
     description: |-
       Use this input to specify custom options, to append to the end of the ionic-cli build command.
 
@@ -98,18 +103,21 @@ inputs:
 - ionic_username:
   opts:
     title: Ionic username
+    summary: Ionic username for ionic-cli login.
     description: |-
       Use `Ionic username` and `Ionic password` to login with ionic-cli.
     is_sensitive: true
 - ionic_password:
   opts:
     title: Ionic password
+    summary: Ionic password for ionic-cli login.
     description: |-
       Use `Ionic username` and `Ionic password` to login with ionic-cli.
     is_sensitive: true
 - ionic_version:
   opts:
     title: Ionic version
+    summary: The version of ionic you want to use.
     description: |-
       The version of ionic you want to use.
 
@@ -118,6 +126,7 @@ inputs:
 - run_ionic_prepare: "true"
   opts:
     title: Should `ionic cordova prepare` be executed before `ionic cordova build`?
+    summary: Should ionic cordova prepare be executed before ionic cordova build.
     description: |-
       It should be set to false if ionic-prepare step is used.
 
@@ -126,6 +135,7 @@ inputs:
 - cordova_version:
   opts:
     title: Cordova version
+    summary: The version of cordova you want to use.
     description: |-
       The version of cordova you want to use.
 
@@ -134,6 +144,7 @@ inputs:
 - workdir: $BITRISE_SOURCE_DIR
   opts:
     title: Working directory
+    summary: Root directory of your Ionic project.
     description: |-
       Root directory of your Ionic project, where your Ionic config.xml exists.
     is_required: true
@@ -153,6 +164,7 @@ inputs:
   opts:
     category: Cache
     title: Cache node_modules
+    summary: Select if the contents of node_modules directory should be cached.
     description: |
       Select if the contents of node_modules directory should be cached.
       `true`: Mark local dependencies to be cached.
@@ -165,24 +177,38 @@ outputs:
 - BITRISE_IPA_PATH:
   opts:
     title: The created ios .ipa file's path
+    summary: The created iOS .ipa file's path.
+    description: The created iOS .ipa file's path.
 - BITRISE_APP_DIR_PATH:
   opts:
     title: The created ios .app dir's path
+    summary: The created iOS .app directory's path.
+    description: The created iOS .app directory's path.
 - BITRISE_APP_PATH:
   opts:
     title: The created ios .app.zip file's path
+    summary: The created iOS .app.zip file's path.
+    description: The created iOS .app.zip file's path.
 - BITRISE_DSYM_DIR_PATH:
   opts:
     title: The created ios .dSYM dir's path
+    summary: The created iOS .dSYM directory's path.
+    description: The created iOS .dSYM directory's path.
 - BITRISE_DSYM_PATH:
   opts:
     title: The created ios .dSYM.zip file's path
+    summary: The created iOS .dSYM.zip file's path.
+    description: The created iOS .dSYM.zip file's path.
 - BITRISE_APK_PATH: ""
   opts:
     title: The created android .apk file's path
+    summary: The created Android .apk file's path.
+    description: The created Android .apk file's path.
 - BITRISE_APK_PATH_LIST: ""
   opts:
     title: The created android .apk file paths (separated via |)
+    summary: The created Android .apk file paths, separated by |.
+    description: The created Android .apk file paths, separated by |.
 - BITRISE_AAB_PATH:
   opts:
     title: Path of the generated AAB
