@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -16,7 +17,7 @@ import (
 	"github.com/bitrise-io/go-utils/errorutil"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
-	"github.com/bitrise-io/go-utils/sliceutil"
+
 	"github.com/bitrise-io/go-utils/ziputil"
 	"github.com/bitrise-steplib/steps-ionic-archive/ionic"
 	ver "github.com/hashicorp/go-version"
@@ -466,11 +467,11 @@ func main() {
 	}
 
 	// if android in platforms
-	if len(distPkg) == 0 && sliceutil.IsStringInSlice("android", platforms) {
+	if len(distPkg) == 0 && slices.Contains(platforms, "android") {
 		fail("No %s generated", ext)
 	}
 	// if ios in platforms
-	if sliceutil.IsStringInSlice("ios", platforms) {
+	if slices.Contains(platforms, "ios") {
 		if len(apps) == 0 && configs.Target == "emulator" {
 			fail("no apps generated")
 		}
