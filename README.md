@@ -37,7 +37,7 @@ If you set the **Build configuration** input in the **Generate Cordova Build Con
 
 ## 🧩 Get started
 
-Add this step directly to your workflow in the [Bitrise Workflow Editor](https://devcenter.bitrise.io/steps-and-workflows/steps-and-workflows-index/).
+Add this step directly to your workflow in the [Bitrise Workflow Editor](https://docs.bitrise.io/en/bitrise-ci/workflows-and-pipelines/steps/adding-steps-to-a-workflow.html).
 
 You can also run this step directly with [Bitrise CLI](https://github.com/bitrise-io/bitrise).
 
@@ -68,13 +68,13 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 
 | Environment Variable | Description |
 | --- | --- |
-| `BITRISE_IPA_PATH` |  |
-| `BITRISE_APP_DIR_PATH` |  |
-| `BITRISE_APP_PATH` |  |
-| `BITRISE_DSYM_DIR_PATH` |  |
-| `BITRISE_DSYM_PATH` |  |
-| `BITRISE_APK_PATH` |  |
-| `BITRISE_APK_PATH_LIST` |  |
+| `BITRISE_IPA_PATH` | The created iOS .ipa file's path. |
+| `BITRISE_APP_DIR_PATH` | The created iOS .app directory's path. |
+| `BITRISE_APP_PATH` | The created iOS .app.zip file's path. |
+| `BITRISE_DSYM_DIR_PATH` | The created iOS .dSYM directory's path. |
+| `BITRISE_DSYM_PATH` | The created iOS .dSYM.zip file's path. |
+| `BITRISE_APK_PATH` | The created Android .apk file's path. |
+| `BITRISE_APK_PATH_LIST` | The created Android .apk file paths, separated by \|. |
 | `BITRISE_AAB_PATH` | This output will include the path of the generated AAB. If the build generates more than one AAB this output will contain the last one's path. |
 | `BITRISE_AAB_PATH_LIST` | This output will include the paths of the generated AABs. The paths are separated with `\|` character, for example, `app--debug.aab\|app-mips-debug.aab` |
 </details>
@@ -83,11 +83,10 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 
 We welcome [pull requests](https://github.com/bitrise-steplib/steps-ionic-archive/pulls) and [issues](https://github.com/bitrise-steplib/steps-ionic-archive/issues) against this repository.
 
-For pull requests, work on your changes in a forked repository and use the Bitrise CLI to [run step tests locally](https://devcenter.bitrise.io/bitrise-cli/run-your-first-build/).
+For pull requests, work on your changes in a forked repository and use the Bitrise CLI to [run step tests locally](https://docs.bitrise.io/en/bitrise-ci/bitrise-cli/running-your-first-local-build-with-the-cli.html).
 
 **Note:** this step's end-to-end tests (defined in `e2e/bitrise.yml`) are working with secrets which are intentionally not stored in this repo. External contributors won't be able to run those tests. Don't worry, if you open a PR with your contribution, we will help with running tests and make sure that they pass.
 
 Learn more about developing steps:
 
-- [Create your own step](https://devcenter.bitrise.io/contributors/create-your-own-step/)
-- [Testing your Step](https://devcenter.bitrise.io/contributors/testing-and-versioning-your-steps/)
+- [Create your own step](https://docs.bitrise.io/en/bitrise-ci/workflows-and-pipelines/developing-your-own-bitrise-step/developing-a-new-step.html)
