@@ -144,6 +144,15 @@ workflows:
         - repository_url: $TEST_APP_URL
         - branch: $TEST_APP_BRANCH
         - clone_into_dir: $BITRISE_SOURCE_DIR/_tmp
+    - script:
+        title: Upgrade cordova-android to v13 for Android SDK XML compatibility
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+            # cordova-android@12 uses AGP 7.x which can't parse the newer Android SDK XML schema.
+            # cordova-android@13 uses AGP 8.x which handles it correctly.
+            sed -i.bak 's/\^12\.[0-9]*\.[0-9]*/^13.0.0/g' $BITRISE_SOURCE_DIR/_tmp/config.xml
     - nvm@1:
         inputs:
         - node_version: 18
