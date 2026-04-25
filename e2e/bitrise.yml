@@ -84,7 +84,7 @@ workflows:
     - PLATFORM: ios,android
     - CONFIGURATION: debug
     - OPTIONS: |-
-        -- --buildFlag="-destination platform=iOS Simulator,OS=latest"
+        --
     before_run:
     - _setup
     - _install_dependencies_with_npm
@@ -108,7 +108,7 @@ workflows:
     - PLATFORM: ios,android
     - CONFIGURATION: debug
     - OPTIONS: |-
-        -- --buildFlag="-destination platform=iOS Simulator,OS=latest"
+        --
     before_run:
     - _setup
     - _install_dependencies_with_yarn
