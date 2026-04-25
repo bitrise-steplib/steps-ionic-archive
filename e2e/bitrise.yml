@@ -147,7 +147,7 @@ workflows:
 
     - nvm@1:
         inputs:
-        - node_version: 18
+        - node_version: 20
     - set-java-version:
         run_if: "{{ .IsCI }}"
         inputs:
