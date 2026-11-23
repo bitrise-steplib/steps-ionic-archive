@@ -165,24 +165,31 @@ outputs:
 - BITRISE_IPA_PATH:
   opts:
     title: The created ios .ipa file's path
+    summary: Path of the generated .ipa file.
 - BITRISE_APP_DIR_PATH:
   opts:
     title: The created ios .app dir's path
+    summary: Path of the generated .app directory.
 - BITRISE_APP_PATH:
   opts:
     title: The created ios .app.zip file's path
+    summary: Path of the zipped .app file (.app.zip).
 - BITRISE_DSYM_DIR_PATH:
   opts:
     title: The created ios .dSYM dir's path
+    summary: Path of the directory that contains the generated .dSYM files.
 - BITRISE_DSYM_PATH:
   opts:
     title: The created ios .dSYM.zip file's path
+    summary: Path of the zipped .dSYM files (.dSYM.zip).
 - BITRISE_APK_PATH: ""
   opts:
     title: The created android .apk file's path
+    summary: Path of the generated .apk file.
 - BITRISE_APK_PATH_LIST: ""
   opts:
     title: The created android .apk file paths (separated via |)
+    summary: List of the generated .apk paths, separated with the `|` character.
 - BITRISE_AAB_PATH:
   opts:
     title: Path of the generated AAB
