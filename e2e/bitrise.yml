@@ -5,16 +5,14 @@ app:
   envs:
   # Shared test configs
   - TEST_APP_URL: https://github.com/bitrise-io/Bitrise-Ionic-Sample.git
-  - TEST_APP_BRANCH: main
+  - TEST_APP_BRANCH: bitrise-limited-team
+  - TEAM_ID: DT2C2FZ7U2
   # Shared test secrets
-  - BITRISE_APPSTORECONNECT_API_KEY_URL: $BITRISE_APPSTORECONNECT_API_KEY_URL
-  - BITRISE_APPSTORECONNECT_API_KEY_ID: $BITRISE_APPSTORECONNECT_API_KEY_ID
-  - BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID: $BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID
-  # Excluding the Mac certificates because the `manage-ios-code-signing` step handles them incorrectly and
-  # would sometimes set a Mac certificate for this iOS sample app
-  - BITRISE_APPLE_APPLE_NOMAC_CERTIFICATE_URL_LIST: $BITRISE_APPLE_APPLE_NOMAC_CERTIFICATE_URL_LIST
-  - BITRISE_APPLE_APPLE_NOMAC_CERTIFICATE_PASSPHRASE_LIST: $BITRISE_APPLE_APPLE_NOMAC_CERTIFICATE_PASSPHRASE_LIST
-  - BITRISE_APPLE_TEAM_ID: $BITRISE_APPLE_TEAM_ID
+  - BLTD_APPSTORECONNECT_API_KEY_URL: $BLTD_APPSTORECONNECT_API_KEY_URL
+  - BLTD_APPSTORECONNECT_API_KEY_ID: $BLTD_APPSTORECONNECT_API_KEY_ID
+  - BLTD_APPSTORECONNECT_API_KEY_ISSUER_ID: $BLTD_APPSTORECONNECT_API_KEY_ISSUER_ID
+  - BLTD_APPLE_CERTIFICATE_URL_LIST: $BLTD_APPLE_CERTIFICATE_URL_LIST
+  - BLTD_APPLE_CERTIFICATE_PASSPHRASE_LIST: $BLTD_APPLE_CERTIFICATE_PASSPHRASE_LIST
   - IONIC_USERNAME: $IONIC_USERNAME
   - IONIC_PASSWORD: $IONIC_PASSWORD
 
@@ -50,12 +48,12 @@ workflows:
         - distribution_method: development
         - project_path: $BITRISE_SOURCE_DIR/_tmp/platforms/ios/bitrise-cordova.xcworkspace
         - scheme: bitrise-cordova
-        - certificate_url_list: $BITRISE_APPLE_APPLE_NOMAC_CERTIFICATE_URL_LIST
-        - passphrase_list: $BITRISE_APPLE_APPLE_NOMAC_CERTIFICATE_PASSPHRASE_LIST
-        - apple_team_id: $BITRISE_APPLE_TEAM_ID
-        - api_key_path: $BITRISE_APPSTORECONNECT_API_KEY_URL
-        - api_key_id: $BITRISE_APPSTORECONNECT_API_KEY_ID
-        - api_key_issuer_id: $BITRISE_APPSTORECONNECT_API_KEY_ISSUER_ID
+        - certificate_url_list: $BLTD_APPLE_CERTIFICATE_URL_LIST
+        - passphrase_list: $BLTD_APPLE_CERTIFICATE_PASSPHRASE_LIST
+        - apple_team_id: $TEAM_ID
+        - api_key_path: $BLTD_APPSTORECONNECT_API_KEY_URL
+        - api_key_id: $BLTD_APPSTORECONNECT_API_KEY_ID
+        - api_key_issuer_id: $BLTD_APPSTORECONNECT_API_KEY_ISSUER_ID
         - verbose_log: "yes"
     - generate-cordova-build-configuration:
         inputs:
