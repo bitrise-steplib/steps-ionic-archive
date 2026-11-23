@@ -150,7 +150,7 @@ workflows:
     - set-java-version:
         run_if: "{{ .IsCI }}"
         inputs:
-        - set_java_version: 11
+        - set_java_version: 17
     - script:
         inputs:
         - content: |-
