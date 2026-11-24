@@ -13,8 +13,6 @@ app:
   - BLTD_APPSTORECONNECT_API_KEY_ISSUER_ID: $BLTD_APPSTORECONNECT_API_KEY_ISSUER_ID
   - BLTD_APPLE_CERTIFICATE_URL_LIST: $BLTD_APPLE_CERTIFICATE_URL_LIST
   - BLTD_APPLE_CERTIFICATE_PASSPHRASE_LIST: $BLTD_APPLE_CERTIFICATE_PASSPHRASE_LIST
-  - IONIC_USERNAME: $IONIC_USERNAME
-  - IONIC_PASSWORD: $IONIC_PASSWORD
 
 workflows:
   test_ios_device_build:
@@ -133,8 +131,6 @@ workflows:
         - options: $OPTIONS
         - ionic_version: latest
         - cordova_version: latest
-        - ionic_username: $IONIC_USERNAME
-        - ionic_password: $IONIC_PASSWORD
         - workdir: $BITRISE_SOURCE_DIR/_tmp
 
   _setup:
