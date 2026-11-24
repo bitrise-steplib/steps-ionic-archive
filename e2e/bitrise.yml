@@ -51,12 +51,12 @@ workflows:
             set -ex
             # TODO: remove once code signing detects Catalyst-enabled iOS targets as iOS, not macOS.
             sed -i '' 's/SUPPORTS_MACCATALYST = YES;/SUPPORTS_MACCATALYST = NO;/g' \
-              "$BITRISE_SOURCE_DIR/_tmp/platforms/ios/bitrise-cordova.xcodeproj/project.pbxproj"
+              "$BITRISE_SOURCE_DIR/_tmp/platforms/ios/App.xcodeproj/project.pbxproj"
     - manage-ios-code-signing@2:
         inputs:
         - distribution_method: development
-        - project_path: $BITRISE_SOURCE_DIR/_tmp/platforms/ios/bitrise-cordova.xcworkspace
-        - scheme: bitrise-cordova
+        - project_path: $BITRISE_SOURCE_DIR/_tmp/platforms/ios/App.xcworkspace
+        - scheme: App
         - certificate_url_list: $BLTD_APPLE_CERTIFICATE_URL_LIST
         - passphrase_list: $BLTD_APPLE_CERTIFICATE_PASSPHRASE_LIST
         - apple_team_id: $TEAM_ID
@@ -153,7 +153,7 @@ workflows:
         - clone_into_dir: $BITRISE_SOURCE_DIR/_tmp
     - nvm@1:
         inputs:
-        - node_version: 18
+        - node_version: 22
     - set-java-version:
         run_if: "{{ .IsCI }}"
         inputs:
