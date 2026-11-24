@@ -43,6 +43,15 @@ workflows:
         - platform: ios
         - ionic_version: latest
         - cordova_version: latest
+    - script:
+        title: Disable Mac Catalyst
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+            # TODO: remove once code signing detects Catalyst-enabled iOS targets as iOS, not macOS.
+            sed -i '' 's/SUPPORTS_MACCATALYST = YES;/SUPPORTS_MACCATALYST = NO;/g' \
+              "$BITRISE_SOURCE_DIR/_tmp/platforms/ios/bitrise-cordova.xcodeproj/project.pbxproj"
     - manage-ios-code-signing@2:
         inputs:
         - distribution_method: development
