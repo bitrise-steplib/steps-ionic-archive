@@ -91,7 +91,7 @@ workflows:
     - PLATFORM: ios,android
     - CONFIGURATION: debug
     - OPTIONS: |-
-        -- --buildFlag="-destination platform=iOS Simulator,OS=latest,name=iPhone 11"
+        -- --buildFlag="-destination generic/platform=iOS Simulator"
     before_run:
     - _setup
     - _install_dependencies_with_npm
@@ -115,7 +115,7 @@ workflows:
     - PLATFORM: ios,android
     - CONFIGURATION: debug
     - OPTIONS: |-
-        -- --buildFlag="-destination platform=iOS Simulator,OS=latest,name=iPhone 11"
+        -- --buildFlag="-destination generic/platform=iOS Simulator"
     before_run:
     - _setup
     - _install_dependencies_with_yarn
