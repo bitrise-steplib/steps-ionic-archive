@@ -164,7 +164,7 @@ workflows:
             #!/usr/bin/env bash
             set -ex
             # Cordova doesn't install required build-tools package automatically, but requires a minimum version
-            sdkmanager "build-tools;33.0.2"
+            sdkmanager "build-tools;36.0.0"
 
   _install_dependencies_with_npm:
     steps:
